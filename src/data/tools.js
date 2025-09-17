@@ -34,7 +34,7 @@ export const tools = [
     },
     {
         id: "codificador-b64",
-        name: "Base64 Encoder/Decoder",
+        name: "Base64",
         shortDescription: "Codifica y decodifica texto en Base64.",
         description: "Convierte texto plano en Base64 y viceversa. Una herramienta esencial para manejar datos codificados de forma segura.",
         features: ["Codificación y decodificación", "Soporte para múltiples formatos", "Interfaz simple y rápida"],
