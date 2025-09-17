@@ -1,24 +1,26 @@
 import React, { useState } from "react";
 import ThemeIcon from "./ThemeIcon";
 import { useTheme } from "../hooks/useTheme";
-import { useScrollEffects } from "../hooks/useScrollEffects";
 import { MdMenu, MdClose } from "react-icons/md";
+
+// El hook de scroll ya no es necesario aquí.
+// import { useScrollEffects } from "../hooks/useScrollEffects";
 
 const navItems = [
     { id: "inicio", label: "Inicio", type: "internal" },
-    { id: "generador-qr", label: "Generador QR", type: "internal" },
-    { id: "formateador-json", label: "Formateador JSON", type: "internal" },
-    { id: "codificador-b64", label: "Codificador B64", type: "internal" },
+    { id: "dev-tools", label: "Dev Tools", type: "internal" },
     { id: "contacto", label: "Contacto", type: "external", href: "mailto:colidom@outlook.com" },
 ];
 
-export default function Header() {
+// Recibe las props `activePage` y `onPageChange`
+export default function Header({ activePage, onPageChange }) {
     const { theme, menuOpen, setMenuOpen, handleChange, themeTranslations } = useTheme();
-    const { activeSection, handleNavClick } = useScrollEffects();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    const handleMobileNavClick = (e, sectionId) => {
-        handleNavClick(e, sectionId);
+    // Usa la función recibida por props para cambiar la página
+    const handleNavClick = (e, pageId) => {
+        e.preventDefault();
+        onPageChange(pageId);
         setIsMobileMenuOpen(false);
     };
 
@@ -40,10 +42,11 @@ export default function Header() {
                             return (
                                 <button
                                     key={item.id}
+                                    // Llama a la nueva función de cambio de página
                                     onClick={(e) => handleNavClick(e, item.id)}
                                     className={`px-4 py-2 transition-colors duration-200 rounded-full
                                         ${
-                                            activeSection === item.id
+                                            activePage === item.id
                                                 ? "bg-blue-600 text-white"
                                                 : "text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
                                         }`}
@@ -110,7 +113,7 @@ export default function Header() {
             >
                 <div className="container mx-auto px-4 py-6 flex flex-col items-center">
                     <div className="flex justify-between w-full">
-                        <span className="font-bold text-2xl">colidom-Lab</span>
+                        <span className="font-bold text-2xl">Colidom-Lab</span>
                         <button onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 dark:text-gray-200">
                             <MdClose size={32} />
                         </button>
@@ -121,10 +124,11 @@ export default function Header() {
                                 return (
                                     <li key={item.id}>
                                         <button
-                                            onClick={(e) => handleMobileNavClick(e, item.id)}
+                                            // Llama a la nueva función de cambio de página
+                                            onClick={(e) => handleNavClick(e, item.id)}
                                             className={`px-4 py-2 transition-colors duration-200 rounded-full
                                                 ${
-                                                    activeSection === item.id
+                                                    activePage === item.id
                                                         ? "bg-blue-600 text-white"
                                                         : "text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
                                                 }`}
