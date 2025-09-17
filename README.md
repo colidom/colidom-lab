@@ -1,70 +1,66 @@
-# Getting Started with Create React App
+# Colidom-Lab
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### Descripción
 
-## Available Scripts
+Colidom-Lab es un laboratorio de herramientas para desarrolladores, una colección de mini-aplicaciones prácticas diseñadas para simplificar tareas comunes del día a día. Construido con React en el frontend y Tailwind CSS para un diseño moderno y responsive.
 
-In the project directory, you can run:
+El objetivo de este proyecto es crear un espacio funcional donde los desarrolladores puedan acceder a utilidades como generadores, formateadores y convertidores, todo en un solo lugar.
 
-### `npm start`
+#### Herramientas Incluidas
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+-   Generador de Códigos QR: Convierte texto o URLs en códigos QR descargables.
+-   Formateador de JSON: Formatea y valida datos JSON de manera legible.
+-   Codificador/Decodificador: Herramienta para convertir texto a formatos Base64 y hexadecimal, y viceversa.
+-   Selector de Tema: Alterna entre temas claro, oscuro y de sistema para una experiencia de usuario personalizada.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+#### Tecnologías Utilizadas
 
-### `npm test`
+-   React: Biblioteca de JavaScript para construir interfaces de usuario.
+-   Tailwind CSS: Framework CSS de bajo nivel para un rápido desarrollo de estilos.
+-   Vercel: Plataforma de despliegue para el frontend y backend.
+-   Vite: Herramienta de construcción para una experiencia de desarrollo rápida.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Cómo Empezar 🚀
 
-### `npm run build`
+Para ejecutar este proyecto en tu entorno local, sigue estos pasos:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Clonar el repositorio:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```Bash
+git clone https://github.com/tu-usuario/colidom-lab.git
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```Bash
+cd colidom-lab
+```
 
-### `npm run eject`
+### Instalar las dependencias:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```Bash
+npm install
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Ejecutar la aplicación:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```Bash
+npm run dev
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+La aplicación se iniciará en http://localhost:5173 (o un puerto similar).
 
-## Learn More
+### Contribuciones
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Las contribuciones son bienvenidas. Si tienes una idea para una nueva herramienta, mejoras o correcciones de errores, por favor, abre un issue o envía un pull request.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+-   Haz un fork del repositorio.
+-   Crea una nueva rama (git checkout -b feature/nueva-herramienta).
+-   Realiza tus cambios y haz commit (git commit -m 'feat: Añadir nueva herramienta de ejemplo').
+-   Sube la rama (git push origin feature/nueva-herramienta).
+-   Abre un pull request.
 
-### Code Splitting
+### Contacto
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Si tienes alguna pregunta, puedes contactar al autor del proyecto en colidom@outlook.com.
 
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Licencia
+Este proyecto está bajo la Licencia ...
