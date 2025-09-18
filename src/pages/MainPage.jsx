@@ -16,7 +16,7 @@ const MainPage = () => {
         >
             {/* Sección de Bienvenida y Buscador */}
             <div className="w-full max-w-2xl mb-12">
-                <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">Colidom-Lab</h1>
+                <h1 className="text-4xl mt-12 sm:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">Colidom-Lab</h1>
                 <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-8">Un laboratorio de herramientas para desarrolladores.</p>
                 <input
                     type="text"
