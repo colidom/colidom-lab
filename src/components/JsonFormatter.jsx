@@ -11,15 +11,6 @@ export default function JsonFormatter() {
     const [isCopied, setIsCopied] = useState(false);
     const timeoutRef = useRef(null);
 
-    const errorMessages = {
-        "Unexpected token": "Hay un carácter inesperado. Revisa la sintaxis en la posición indicada.",
-        "Unexpected end of JSON input": "El JSON está incompleto. Parece que falta una llave o un corchete al final.",
-        "Bad control character in string literal":
-            "Hay un carácter de control inválido en un texto. Revisa si hay saltos de línea o tabulaciones extrañas.",
-        "Duplicate key": "Hay una clave duplicada en un objeto JSON. Las claves deben ser únicas.",
-        "Unterminated string in JSON at position": "Falta una comilla de cierre para una cadena de texto.",
-    };
-
     const handleInputChange = (e) => {
         const value = e.target.value;
         setJsonInput(value);
@@ -35,14 +26,7 @@ export default function JsonFormatter() {
             setError(null);
         } catch (e) {
             setFormattedJson("");
-            let translatedError = "JSON inválido. Revisa la sintaxis.";
-            for (const key in errorMessages) {
-                if (e.message.startsWith(key)) {
-                    translatedError = errorMessages[key];
-                    break;
-                }
-            }
-            setError(translatedError + " " + e.message);
+            setError("JSON inválido. Revisa la sintaxis. " + e.message);
         }
     };
 
@@ -50,18 +34,15 @@ export default function JsonFormatter() {
         navigator.clipboard.writeText(formattedJson);
         setIsCopied(true);
 
-        // Limpiar timeout anterior si existe
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
         }
 
-        // Configurar un nuevo timeout para ocultar el popup
         timeoutRef.current = setTimeout(() => {
             setIsCopied(false);
-        }, 2000); // El popup durará 2 segundos
+        }, 2000);
     };
 
-    // Limpiar el timeout cuando el componente se desmonte
     useEffect(() => {
         return () => {
             if (timeoutRef.current) {
@@ -77,9 +58,9 @@ export default function JsonFormatter() {
 
     return (
         <div className="flex flex-col gap-8">
-            <div className="flex flex-col md:flex-row gap-8">
+            <div className="flex flex-col md:flex-row md:items-start gap-8">
                 {/* Panel de entrada */}
-                <div className="w-full md:w-1/2">
+                <div className="w-full md:w-1/2 flex flex-col">
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Entrada (JSON sin formato)</h3>
                     <textarea
                         className="w-full h-80 p-4 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -89,14 +70,14 @@ export default function JsonFormatter() {
                     ></textarea>
                 </div>
                 {/* Panel de salida */}
-                <div className="w-full md:w-1/2">
-                    <div className="flex justify-between items-center mb-2 relative">
-                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Salida (JSON Formateado)</h3>
-                        <div className="relative">
+                <div className="w-full md:w-1/2 flex flex-col">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Salida (JSON Formateado)</h3>
+                    <div className="relative w-full h-80 overflow-auto border rounded-md bg-gray-50 dark:bg-gray-700 text-sm">
+                        <div className="absolute top-2 right-2 z-10">
                             <button
                                 onClick={handleCopy}
                                 disabled={!formattedJson}
-                                className={`p-1 rounded-md transition-colors duration-200 
+                                className={`p-1 rounded-md transition-colors duration-200 relative
                                     ${
                                         formattedJson
                                             ? "text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -105,17 +86,14 @@ export default function JsonFormatter() {
                                 aria-label="Copiar JSON"
                                 title="Copiar JSON"
                             >
-                                <MdContentCopy size={24} />
+                                <MdContentCopy size={20} />
+                                {isCopied && (
+                                    <span className="absolute top-1/2 right-full transform -translate-y-1/2 mr-2 px-3 py-1 bg-green-500 text-white text-xs rounded-md whitespace-nowrap animate-fade-in-out">
+                                        ¡Copiado!
+                                    </span>
+                                )}
                             </button>
-                            {/* Popup de "Copiado" */}
-                            {isCopied && (
-                                <span className="absolute top-1/2 right-full transform -translate-y-1/2 mr-2 px-3 py-1 bg-green-500 text-white text-xs rounded-md whitespace-nowrap animate-fade-in-out">
-                                    ¡Copiado!
-                                </span>
-                            )}
                         </div>
-                    </div>
-                    <div className="relative w-full h-80 overflow-auto border rounded-md bg-gray-50 dark:bg-gray-700 text-sm">
                         <pre className="p-4">
                             <code className="language-json" dangerouslySetInnerHTML={{ __html: formattedCode }} />
                         </pre>
