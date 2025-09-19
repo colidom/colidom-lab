@@ -12,7 +12,7 @@ const MainPage = () => {
     return (
         <div
             id="inicio"
-            className="container mx-auto px-6 md:px-20 max-w-5xl pt-20 pb-12 min-h-[calc(100vh-100px)] flex flex-col items-center justify-center text-center"
+            className="container mx-auto px-6 md:px-20 max-w-7xl pt-20 pb-12 min-h-[calc(100vh-100px)] flex flex-col items-center justify-center text-center"
         >
             {/* Sección de Bienvenida y Buscador */}
             <div className="w-full max-w-2xl mb-12">

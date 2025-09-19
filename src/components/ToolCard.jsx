@@ -18,17 +18,18 @@ const ToolCard = ({ tool }) => {
             `}
         >
             {/* Encabezado y título de la tarjeta */}
-            <div className="flex items-start justify-between mb-4">
-                <div className="flex-grow flex items-center">
-                    {IconComponent && <IconComponent className={`h-12 w-12 ${colorClasses.icon} mr-4 flex-shrink-0`} />}
-                    <div className="text-left">
-                        <h3 className={`text-2xl font-bold ${colorClasses.title} mb-1`}>{name}</h3>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm">{shortDescription}</p>
-                    </div>
+            <div className="flex items-start justify-between mb-4 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
+                {/* Contenedor del ícono (ancho fijo) */}
+                <div className="flex-shrink-0 mr-4">{IconComponent && <IconComponent className={`h-12 w-12 ${colorClasses.icon}`} />}</div>
+
+                {/* Contenedor del texto (crece para ocupar espacio) */}
+                <div className="flex-grow text-left">
+                    <h3 className={`text-2xl font-bold ${colorClasses.title} mb-1`}>{name}</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">{shortDescription}</p>
                 </div>
+
                 {/* Expand/Collapse Button */}
                 <button
-                    onClick={() => setIsExpanded(!isExpanded)}
                     className={`
                         p-1 rounded-full transition-transform duration-300
                         ${isExpanded ? "transform rotate-180" : ""}
@@ -42,11 +43,8 @@ const ToolCard = ({ tool }) => {
 
             {/* Contenido detallado (condicionalmente renderizado) */}
             {isExpanded && (
-                // Ajuste clave: Usamos 'flex-grow flex flex-col justify-between' aquí
                 <div className="flex-grow flex flex-col justify-between text-left animate-slide-down">
                     <div>
-                        {" "}
-                        {/* Contenedor para la descripción y la lista */}
                         <p className="text-gray-700 dark:text-gray-300 mb-4">{description}</p>
                         <ul className="list-none space-y-2">
                             {features.map((feature, index) => (

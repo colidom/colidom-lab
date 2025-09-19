@@ -1,10 +1,7 @@
 import React from "react";
 import { MdFormatAlignLeft, MdColorLens, MdLock, MdQrCode } from "react-icons/md";
+import JsonFormatter from "../components/JsonFormatter";
 
-// Importa los componentes de cada herramienta
-// Asumimos que ya los has creado o los crearás.
-// Por ahora, solo usamos componentes de marcador de posición.
-const JsonFormatter = () => <div>Componente para el Formateador de JSON</div>;
 const ColorPalette = () => <div>Componente para la Paleta de Colores</div>;
 const Base64Converter = () => <div>Componente para el Codificador/Decodificador Base64</div>;
 const QrGenerator = () => <div>Componente para el Generador de QR</div>;
