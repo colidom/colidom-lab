@@ -6,7 +6,7 @@ export default function DevTools() {
     const activeTool = devTools.find((tool) => tool.id === activeToolId);
 
     return (
-        <div id="dev-tools" className="container mx-auto px-6 md:px-20 max-w-5xl pt-32 pb-12">
+        <div id="dev-tools" className="container mx-auto px-6 md:px-20 max-w-8xl pt-32 pb-12">
             {/* Barra de Navegación de Herramientas */}
             <div className="flex flex-wrap justify-center sm:justify-start gap-4 mb-8">
                 {devTools.map((tool) => (
