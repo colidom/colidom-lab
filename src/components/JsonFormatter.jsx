@@ -61,17 +61,17 @@ export default function JsonFormatter() {
             <div className="flex flex-col md:flex-row md:items-start gap-8">
                 {/* Panel de entrada */}
                 <div className="w-full md:w-1/2 flex flex-col">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Entrada (JSON sin formato)</h3>
+                    <h3 className="text-l font-semibold text-gray-900 dark:text-white mb-2">JSON sin formato</h3>
                     <textarea
                         className="w-full h-80 p-4 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                        placeholder="Pega tu JSON aquí..."
+                        placeholder={`{"name": "colidom",  "age": 33, "location": "Tenerife", "projects": ["Prioreisen", "Colidom-lab", "React Portfolio Template"]}`}
                         value={jsonInput}
                         onChange={handleInputChange}
                     ></textarea>
                 </div>
                 {/* Panel de salida */}
                 <div className="w-full md:w-1/2 flex flex-col">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Salida (JSON Formateado)</h3>
+                    <h3 className="text-l font-semibold text-gray-900 dark:text-white mb-2">JSON Formateado</h3>
                     <div className="relative w-full h-80 overflow-auto border rounded-md bg-gray-50 dark:bg-gray-700 text-sm">
                         <div className="absolute top-2 right-2 z-10">
                             <button
