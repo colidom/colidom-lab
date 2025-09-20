@@ -3,12 +3,11 @@ import ThemeIcon from "./ThemeIcon";
 import { useTheme } from "../hooks/useTheme";
 import { MdMenu, MdClose } from "react-icons/md";
 
-// El hook de scroll ya no es necesario aquí.
-// import { useScrollEffects } from "../hooks/useScrollEffects";
-
+// Se añade "utilidades" al array navItems
 const navItems = [
     { id: "inicio", label: "Inicio", type: "internal" },
     { id: "dev-tools", label: "Dev Tools", type: "internal" },
+    { id: "utilidades", label: "Utilidades", type: "internal" },
     { id: "contacto", label: "Contacto", type: "external", href: "mailto:colidom@outlook.com" },
 ];
 
@@ -32,7 +31,7 @@ export default function Header({ activePage, onPageChange }) {
                     <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-gray-600 dark:text-gray-200">
                         {isMobileMenuOpen ? <MdClose size={24} /> : <MdMenu size={24} />}
                     </button>
-                    <span className="ml-2 font-bold text-lg">Colidom-Lab</span>
+                    <span className="ml-2 font-bold text-lg text-gray-900 dark:text-white">Colidom-Lab</span>
                 </div>
 
                 {/* Desktop Navigation - hidden on small screens */}
@@ -42,7 +41,6 @@ export default function Header({ activePage, onPageChange }) {
                             return (
                                 <button
                                     key={item.id}
-                                    // Llama a la nueva función de cambio de página
                                     onClick={(e) => handleNavClick(e, item.id)}
                                     className={`px-4 py-2 transition-colors duration-200 rounded-full
                                         ${
@@ -113,7 +111,7 @@ export default function Header({ activePage, onPageChange }) {
             >
                 <div className="container mx-auto px-4 py-6 flex flex-col items-center">
                     <div className="flex justify-between w-full">
-                        <span className="font-bold text-2xl">Colidom-Lab</span>
+                        <span className="font-bold text-2xl text-gray-900 dark:text-white">Colidom-Lab</span>
                         <button onClick={() => setIsMobileMenuOpen(false)} className="text-gray-600 dark:text-gray-200">
                             <MdClose size={32} />
                         </button>
@@ -124,7 +122,6 @@ export default function Header({ activePage, onPageChange }) {
                                 return (
                                     <li key={item.id}>
                                         <button
-                                            // Llama a la nueva función de cambio de página
                                             onClick={(e) => handleNavClick(e, item.id)}
                                             className={`px-4 py-2 transition-colors duration-200 rounded-full
                                                 ${
@@ -154,7 +151,11 @@ export default function Header({ activePage, onPageChange }) {
                     </ul>
                     <div className="mt-8">
                         <label className="text-gray-600 dark:text-gray-200 mr-2">Tema:</label>
-                        <select onChange={(e) => handleChange(e.target.value)} value={theme} className="rounded-md border p-2 bg-transparent">
+                        <select
+                            onChange={(e) => handleChange(e.target.value)}
+                            value={theme}
+                            className="rounded-md border p-2 bg-transparent text-gray-900 dark:text-white"
+                        >
                             {["light", "dark", "system"].map((option) => (
                                 <option key={option} value={option}>
                                     {themeTranslations[option]}

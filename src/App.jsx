@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import MainPage from "./pages/MainPage";
 import DevTools from "./pages/DevTools";
+import Utilities from "./pages/Utilities";
 
 export default function App() {
     // El estado 'activePage' ahora controla qué componente se renderiza.
@@ -17,6 +18,8 @@ export default function App() {
         switch (activePage) {
             case "dev-tools":
                 return <DevTools />;
+            case "utilidades":
+                return <Utilities />;
             case "inicio":
             default:
                 return <MainPage />;
