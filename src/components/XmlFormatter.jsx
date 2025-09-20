@@ -24,7 +24,6 @@ export default function XmlFormatter() {
             return;
         }
 
-        // Nuevo: Usar el validador explícito de fast-xml-parser
         const validationResult = XMLValidator.validate(value);
 
         if (validationResult !== true) {
@@ -34,13 +33,11 @@ export default function XmlFormatter() {
         }
 
         try {
-            // Si es válido, formatear el XML
             const formatted = vkbeautify.xml(value);
             setFormattedXml(formatted);
             setError(null);
         } catch (e) {
             setFormattedXml("");
-            // Este catch es para errores inesperados del formateador
             setError("Error inesperado al formatear: " + e.message);
         }
     };
