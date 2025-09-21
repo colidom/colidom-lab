@@ -26,7 +26,7 @@ export default function DevTools() {
         <div id="dev-tools" className="flex flex-col md:flex-row min-h-screen">
             {/* Barra de Navegación Lateral */}
             <div className="md:w-64 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 p-6 flex flex-col items-start gap-4 shadow-md md:fixed md:top-0 md:left-0 md:bottom-0 z-10">
-                <div className="flex flex-col gap-2 w-full mt-20">
+                <div className="flex flex-col gap-2 w-full">
                     {devTools.map((item) => (
                         <Link
                             key={item.id}
