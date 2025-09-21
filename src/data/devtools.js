@@ -1,11 +1,10 @@
 import React from "react";
-import { MdFormatAlignLeft, MdColorLens, MdQrCode, MdCode } from "react-icons/md";
+import { MdFormatAlignLeft, MdColorLens, MdLock, MdQrCode, MdCode } from "react-icons/md";
 
 import JsonFormatter from "../components/JsonFormatter";
 import XmlFormatter from "../components/XmlFormatter";
-
 import Base64Converter from "../components/Base64Converter";
-import QrGenerator from "../components/QrGenerator";
+import HexConverter from "../components/HexConverter";
 
 const ColorPalette = () => <div>Componente para la Paleta de Colores</div>;
 
@@ -30,6 +29,13 @@ export const devTools = [
         icon: MdCode,
         component: Base64Converter,
         description: "Codifica y decodifica texto en Base64.",
+    },
+    {
+        id: "hex-converter",
+        label: "Hexadecimal",
+        icon: MdCode,
+        component: HexConverter,
+        description: "Convierte texto a y desde formato hexadecimal.",
     },
     {
         id: "color-palette",
