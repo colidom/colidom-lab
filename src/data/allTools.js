@@ -8,7 +8,7 @@ import QrGenerator from "../components/QrGenerator";
 
 export const categories = [
     { id: "dev-tools", label: "Dev Tools" },
-    { id: "utilities", label: "Utilidades" },
+    { id: "utilities", label: "Utilities" },
 ];
 
 export const allTools = [

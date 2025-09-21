@@ -1,27 +1,36 @@
 import React, { useState, useEffect } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { devTools } from "../data/devtools";
 
-export default function DevTools({ onScrollToSection, sectionToScroll }) {
-    const [activeToolId, setActiveToolId] = useState(devTools[0].id);
+export default function DevTools() {
+    const { toolId } = useParams();
+    const navigate = useNavigate();
+
+    const [activeToolId, setActiveToolId] = useState(toolId || devTools[0].id);
     const activeTool = devTools.find((tool) => tool.id === activeToolId);
 
     useEffect(() => {
-        if (sectionToScroll) {
-            setActiveToolId(sectionToScroll);
-            onScrollToSection();
+        if (!activeTool) {
+            navigate("/dev-tools/json-formatter");
         }
-    }, [sectionToScroll, onScrollToSection]);
+    }, [activeTool, navigate]);
+
+    // Actualizar la herramienta activa cuando el ID en la URL cambia
+    useEffect(() => {
+        if (toolId) {
+            setActiveToolId(toolId);
+        }
+    }, [toolId]);
 
     return (
         <div id="dev-tools" className="flex flex-col md:flex-row min-h-screen">
             {/* Barra de Navegación Lateral */}
             <div className="md:w-64 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 p-6 flex flex-col items-start gap-4 shadow-md md:fixed md:top-0 md:left-0 md:bottom-0 z-10">
-                <div className="flex flex-col gap-2 w-full">
+                <div className="flex flex-col gap-2 w-full mt-20">
                     {devTools.map((item) => (
-                        <button
+                        <Link
                             key={item.id}
-                            id={item.id}
-                            onClick={() => setActiveToolId(item.id)}
+                            to={`/dev-tools/${item.id}`}
                             className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors duration-200 text-left
                                         ${
                                             activeToolId === item.id
@@ -31,7 +40,7 @@ export default function DevTools({ onScrollToSection, sectionToScroll }) {
                         >
                             <item.icon className="text-xl" />
                             <span className="text-base font-semibold">{item.name}</span>
-                        </button>
+                        </Link>
                     ))}
                 </div>
             </div>

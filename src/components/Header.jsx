@@ -1,27 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import ThemeIcon from "./ThemeIcon";
 import { useTheme } from "../hooks/useTheme";
 import { MdMenu, MdClose } from "react-icons/md";
+import { devTools } from "../data/devtools";
+import { utilityTools } from "../data/utilities";
 
-// Se añade "utilidades" al array navItems
 const navItems = [
-    { id: "inicio", label: "Inicio", type: "internal" },
-    { id: "dev-tools", label: "Dev Tools", type: "internal" },
-    { id: "utilidades", label: "Utilidades", type: "internal" },
+    { id: "inicio", label: "Inicio", to: "/", type: "internal" },
+    { id: "dev-tools", label: "Dev Tools", to: `/dev-tools/${devTools[0].id}`, type: "internal" },
+    { id: "utilities", label: "Utilidades", to: `/utilities/${utilityTools[0].id}`, type: "internal" },
     { id: "contacto", label: "Contacto", type: "external", href: "mailto:colidom@outlook.com" },
 ];
 
-// Recibe las props `activePage` y `onPageChange`
-export default function Header({ activePage, onPageChange }) {
+export default function Header() {
+    const location = useLocation();
     const { theme, menuOpen, setMenuOpen, handleChange, themeTranslations } = useTheme();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    // Usa la función recibida por props para cambiar la página
-    const handleNavClick = (e, pageId) => {
-        e.preventDefault();
-        onPageChange(pageId);
-        setIsMobileMenuOpen(false);
+    const getIsActive = (path) => {
+        if (path === "/") {
+            return location.pathname === path;
+        }
+        return location.pathname.startsWith(path);
     };
+
+    useEffect(() => {
+        const applyTheme = () => {
+            if (theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+                document.documentElement.classList.add("dark");
+            } else {
+                document.documentElement.classList.remove("dark");
+            }
+        };
+        applyTheme();
+    }, [theme]);
 
     return (
         <header className="fixed top-0 z-10 w-full flex justify-center py-6">
@@ -35,23 +48,23 @@ export default function Header({ activePage, onPageChange }) {
                 </div>
 
                 {/* Desktop Navigation - hidden on small screens */}
-                <div className="hidden md:flex items-center">
+                <div className="hidden md:flex items-center space-x-4">
                     {navItems.map((item) => {
                         if (item.type === "internal") {
                             return (
-                                <button
+                                <Link
                                     key={item.id}
-                                    onClick={(e) => handleNavClick(e, item.id)}
+                                    to={item.to}
                                     className={`px-4 py-2 transition-colors duration-200 rounded-full
                                         ${
-                                            activePage === item.id
+                                            getIsActive(item.to)
                                                 ? "bg-blue-600 text-white"
                                                 : "text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
                                         }`}
                                     aria-label={`Ir a la herramienta de ${item.label}`}
                                 >
                                     {item.label}
-                                </button>
+                                </Link>
                             );
                         } else if (item.type === "external") {
                             return (
@@ -121,17 +134,18 @@ export default function Header({ activePage, onPageChange }) {
                             if (item.type === "internal") {
                                 return (
                                     <li key={item.id}>
-                                        <button
-                                            onClick={(e) => handleNavClick(e, item.id)}
+                                        <Link
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                            to={item.to}
                                             className={`px-4 py-2 transition-colors duration-200 rounded-full
                                                 ${
-                                                    activePage === item.id
+                                                    getIsActive(item.to)
                                                         ? "bg-blue-600 text-white"
                                                         : "text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
                                                 }`}
                                         >
                                             {item.label}
-                                        </button>
+                                        </Link>
                                     </li>
                                 );
                             } else if (item.type === "external") {
