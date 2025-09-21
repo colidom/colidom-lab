@@ -7,21 +7,31 @@ import Utilities from "./pages/Utilities";
 
 export default function App() {
     const [activePage, setActivePage] = useState("inicio");
+    const [sectionToScroll, setSectionToScroll] = useState(null);
 
     const handlePageChange = (pageId, sectionId = null) => {
+        setSectionToScroll(sectionId);
         setActivePage(pageId);
-        // Desplazarse a la sección si se proporciona un ID
-        if (sectionId) {
-            // Se puede implementar lógica de desplazamiento si es necesario, pero el estado es suficiente por ahora
+    };
+
+    const handleScrollToSection = () => {
+        if (sectionToScroll) {
+            const element = document.getElementById(sectionToScroll);
+            if (element) {
+                // Desplazamiento suave hacia el elemento
+                element.scrollIntoView({ behavior: "smooth", block: "start" });
+                // Limpiamos el estado para evitar desplazamientos repetidos
+                setSectionToScroll(null);
+            }
         }
     };
 
     const renderContent = () => {
         switch (activePage) {
             case "dev-tools":
-                return <DevTools />;
+                return <DevTools onScrollToSection={handleScrollToSection} sectionToScroll={sectionToScroll} />;
             case "utilidades":
-                return <Utilities />;
+                return <Utilities onScrollToSection={handleScrollToSection} sectionToScroll={sectionToScroll} />;
             case "inicio":
             default:
                 return <MainPage onPageChange={handlePageChange} />;

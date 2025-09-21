@@ -1,9 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { utilityTools } from "../data/utilities";
 
-export default function Utilities() {
+// 💡 Recibe las props del desplazamiento
+export default function Utilities({ onScrollToSection, sectionToScroll }) {
     const [activeToolId, setActiveToolId] = useState(utilityTools[0].id);
     const activeTool = utilityTools.find((tool) => tool.id === activeToolId);
+
+    // 💡 Usa useEffect para desplazar la vista
+    useEffect(() => {
+        if (sectionToScroll) {
+            setActiveToolId(sectionToScroll);
+            onScrollToSection();
+        }
+    }, [sectionToScroll, onScrollToSection]);
 
     return (
         <div id="utilidades" className="flex flex-col md:flex-row min-h-screen">
@@ -13,6 +22,7 @@ export default function Utilities() {
                     {utilityTools.map((tool) => (
                         <button
                             key={tool.id}
+                            id={tool.id}
                             onClick={() => setActiveToolId(tool.id)}
                             className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors duration-200 text-left
                                         ${

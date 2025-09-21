@@ -1,9 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { devTools } from "../data/devtools";
 
-export default function DevTools() {
+// 💡 Recibe las props del desplazamiento
+export default function DevTools({ onScrollToSection, sectionToScroll }) {
     const [activeToolId, setActiveToolId] = useState(devTools[0].id);
     const activeTool = devTools.find((tool) => tool.id === activeToolId);
+
+    // 💡 Usa useEffect para desplazar la vista cuando cambia la sección
+    useEffect(() => {
+        if (sectionToScroll) {
+            setActiveToolId(sectionToScroll);
+            onScrollToSection();
+        }
+    }, [sectionToScroll, onScrollToSection]);
 
     return (
         <div id="dev-tools" className="flex flex-col md:flex-row min-h-screen">
@@ -13,6 +22,7 @@ export default function DevTools() {
                     {devTools.map((item) => (
                         <button
                             key={item.id}
+                            id={item.id}
                             onClick={() => setActiveToolId(item.id)}
                             className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors duration-200 text-left
                                         ${
@@ -28,8 +38,8 @@ export default function DevTools() {
                 </div>
             </div>
 
-            {/* Contenedor principal del contenido de la herramienta */}
-            <div className="flex-1 md:ml-64 p-6 md:p-12 mt-20 transition-all duration-300">
+            {/* Contenido principal del contenido de la herramienta */}
+            <div className="flex-1 md:ml-64 p-6 md:p-12 transition-all duration-300">
                 {activeTool && (
                     <div className="container mx-auto max-w-7xl">
                         <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
