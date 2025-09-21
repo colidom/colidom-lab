@@ -1,4 +1,3 @@
-import React from "react";
 import { MdFormatAlignLeft, MdColorLens, MdCode } from "react-icons/md";
 
 import JsonFormatter from "../components/JsonFormatter";
