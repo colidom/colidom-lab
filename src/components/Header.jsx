@@ -7,9 +7,9 @@ import { devTools } from "../data/devtools";
 import { utilityTools } from "../data/utilities";
 
 const navItems = [
-    { id: "inicio", label: "Inicio", to: "/", type: "internal" },
-    { id: "dev-tools", label: "Dev Tools", to: `/dev-tools/${devTools[0].id}`, type: "internal" },
-    { id: "utilities", label: "Utilidades", to: `/utilities/${utilityTools[0].id}`, type: "internal" },
+    { id: "inicio", label: "Inicio", to: "/", basePath: "/", type: "internal" },
+    { id: "dev-tools", label: "Dev Tools", to: `/dev-tools/${devTools[0].id}`, basePath: "/dev-tools", type: "internal" },
+    { id: "utilities", label: "Utilidades", to: `/utilities/${utilityTools[0].id}`, basePath: "/utilities", type: "internal" },
     { id: "contacto", label: "Contacto", type: "external", href: "mailto:colidom@outlook.com" },
 ];
 
@@ -18,11 +18,11 @@ export default function Header() {
     const { theme, menuOpen, setMenuOpen, handleChange, themeTranslations } = useTheme();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    const getIsActive = (path) => {
-        if (path === "/") {
-            return location.pathname === path;
+    const getIsActive = (basePath) => {
+        if (basePath === "/") {
+            return location.pathname === basePath;
         }
-        return location.pathname.startsWith(path);
+        return location.pathname.startsWith(basePath);
     };
 
     useEffect(() => {
@@ -57,7 +57,7 @@ export default function Header() {
                                     to={item.to}
                                     className={`px-4 py-2 transition-colors duration-200 rounded-full
                                         ${
-                                            getIsActive(item.to)
+                                            getIsActive(item.basePath) // 💡 Ahora usa la propiedad "basePath"
                                                 ? "bg-blue-600 text-white"
                                                 : "text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
                                         }`}
@@ -139,7 +139,7 @@ export default function Header() {
                                             to={item.to}
                                             className={`px-4 py-2 transition-colors duration-200 rounded-full
                                                 ${
-                                                    getIsActive(item.to)
+                                                    getIsActive(item.basePath) // 💡 Ahora usa la propiedad "basePath"
                                                         ? "bg-blue-600 text-white"
                                                         : "text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
                                                 }`}
