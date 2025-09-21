@@ -39,7 +39,7 @@ export default function Utilities({ onScrollToSection, sectionToScroll }) {
             </div>
 
             {/* Contenido de la Herramienta Activa */}
-            <div className="flex-1 md:ml-64 p-6 md:p-12 transition-all duration-300">
+            <div className="flex-1 md:ml-64 p-6 md:p-12 mt-20 transition-all duration-300">
                 {activeTool && (
                     <div className="container mx-auto max-w-7xl">
                         <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">

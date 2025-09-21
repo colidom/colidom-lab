@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { devTools } from "../data/devtools";
 
-// 💡 Recibe las props del desplazamiento
 export default function DevTools({ onScrollToSection, sectionToScroll }) {
     const [activeToolId, setActiveToolId] = useState(devTools[0].id);
     const activeTool = devTools.find((tool) => tool.id === activeToolId);
 
-    // 💡 Usa useEffect para desplazar la vista cuando cambia la sección
     useEffect(() => {
         if (sectionToScroll) {
             setActiveToolId(sectionToScroll);
@@ -38,8 +36,8 @@ export default function DevTools({ onScrollToSection, sectionToScroll }) {
                 </div>
             </div>
 
-            {/* Contenido principal del contenido de la herramienta */}
-            <div className="flex-1 md:ml-64 p-6 md:p-12 transition-all duration-300">
+            {/* Contenedor principal del contenido de la herramienta */}
+            <div className="flex-1 md:ml-64 p-6 md:p-12 mt-20 transition-all duration-300">
                 {activeTool && (
                     <div className="container mx-auto max-w-7xl">
                         <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
