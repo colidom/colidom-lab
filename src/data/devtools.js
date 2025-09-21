@@ -1,12 +1,11 @@
 import React from "react";
-import { MdFormatAlignLeft, MdColorLens, MdLock, MdQrCode, MdCode } from "react-icons/md";
+import { MdFormatAlignLeft, MdColorLens, MdCode } from "react-icons/md";
 
 import JsonFormatter from "../components/JsonFormatter";
 import XmlFormatter from "../components/XmlFormatter";
 import Base64Converter from "../components/Base64Converter";
 import HexConverter from "../components/HexConverter";
-
-const ColorPalette = () => <div>Componente para la Paleta de Colores</div>;
+import ColorPalette from "../components/ColorPalette";
 
 export const devTools = [
     {
@@ -42,6 +41,6 @@ export const devTools = [
         label: "Color Palette",
         icon: MdColorLens,
         component: ColorPalette,
-        description: "Herramienta para seleccionar y generar paletas de colores.",
+        description: "Genera paletas de colores armónicas (monocromáticas, análogas, triádicas, etc.) usando el modelo HSL.",
     },
 ];
