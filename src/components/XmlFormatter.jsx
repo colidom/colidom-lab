@@ -76,7 +76,7 @@ export default function XmlFormatter() {
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">XML sin formato</h3>
                     <textarea
                         className="w-full h-80 p-4 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                        placeholder={`{"name": "colidom", "age": 33, "location": "Tenerife", "projects": ["Prioreisen", "Colidom-lab", "React Portfolio Template"]}`}
+                        placeholder={`<persona><nombre>colidom</nombre><edad>33</edad><ubicacion>Tenerife</ubicacion><proyectos><proyecto>Prioreisen</proyecto><proyecto>Colidom-lab</proyecto></proyectos></persona>`}
                         value={xmlInput}
                         onChange={handleInputChange}
                     ></textarea>
