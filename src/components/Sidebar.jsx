@@ -3,9 +3,7 @@ import { Link } from "react-router-dom";
 
 export default function Sidebar({ navItems, activeToolId, basePath }) {
     return (
-        <div className="md:w-64 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 p-6 flex flex-col items-start gap-4 shadow-md md:fixed md:top-0 md:left-0 md:bottom-0 z-10 md:pt-16">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Colidom-Lab</h2>
-
+        <div className="md:w-64 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 p-6 flex flex-col items-start gap-4 shadow-md md:fixed md:top-0 md:left-0 md:bottom-0 z-10 pt-[8.0rem]">
             <div className="flex flex-col gap-2 w-full">
                 {navItems.map((item) => (
                     <Link
