@@ -17,7 +17,7 @@ export default function Header() {
     const location = useLocation();
     const { theme, menuOpen, setMenuOpen, handleChange, themeTranslations } = useTheme();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [isScrolled, setIsScrolled] = useState(false); // Nuevo estado
+    const [isScrolled, setIsScrolled] = useState(false);
 
     const getIsActive = (basePath) => {
         if (basePath === "/") {
@@ -26,7 +26,6 @@ export default function Header() {
         return location.pathname.startsWith(basePath);
     };
 
-    // Efecto para el tema
     useEffect(() => {
         const applyTheme = () => {
             if (theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
@@ -38,7 +37,6 @@ export default function Header() {
         applyTheme();
     }, [theme]);
 
-    // Nuevo efecto para detectar el scroll
     useEffect(() => {
         const handleScroll = () => {
             if (window.scrollY > 10) {
@@ -56,11 +54,11 @@ export default function Header() {
     }, []);
 
     return (
-        <header className="fixed top-0 z-50 w-full flex justify-center py-6">
+        <header className="fixed top-0 w-full flex justify-center py-6">
             <nav
                 className={`
                     flex items-center px-4 py-2 text-sm font-semibold rounded-full border 
-                    transition-all duration-300 ease-in-out
+                    transition-all duration-300 ease-in-out z-50
                     ${
                         isScrolled
                             ? "border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-lg"
@@ -148,7 +146,7 @@ export default function Header() {
 
             {/* Mobile Menu Panel */}
             <div
-                className={`fixed top-0 left-0 w-full h-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-md z-40 transition-transform duration-300
+                className={`fixed top-0 left-0 w-full h-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-md z-[50] transition-transform duration-300
                 ${isMobileMenuOpen ? "translate-y-0" : "-translate-y-full"} md:hidden`}
             >
                 <div className="container mx-auto px-4 py-6 flex flex-col items-center">
