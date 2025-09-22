@@ -17,6 +17,7 @@ export default function Header() {
     const location = useLocation();
     const { theme, menuOpen, setMenuOpen, handleChange, themeTranslations } = useTheme();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false); // Nuevo estado
 
     const getIsActive = (basePath) => {
         if (basePath === "/") {
@@ -25,6 +26,7 @@ export default function Header() {
         return location.pathname.startsWith(basePath);
     };
 
+    // Efecto para el tema
     useEffect(() => {
         const applyTheme = () => {
             if (theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
@@ -36,9 +38,36 @@ export default function Header() {
         applyTheme();
     }, [theme]);
 
+    // Nuevo efecto para detectar el scroll
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 10) {
+                setIsScrolled(true);
+            } else {
+                setIsScrolled(false);
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll);
+
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+        };
+    }, []);
+
     return (
-        <header className="fixed top-0 z-10 w-full flex justify-center py-6">
-            <nav className="flex items-center px-4 py-2 text-sm font-semibold rounded-full border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm shadow-lg">
+        <header className="fixed top-0 z-50 w-full flex justify-center py-6">
+            <nav
+                className={`
+                    flex items-center px-4 py-2 text-sm font-semibold rounded-full border 
+                    transition-all duration-300 ease-in-out
+                    ${
+                        isScrolled
+                            ? "border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-lg"
+                            : "border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm shadow-md"
+                    }
+                `}
+            >
                 {/* Mobile Menu Button - visible on small screens */}
                 <div className="flex items-center md:hidden">
                     <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-gray-600 dark:text-gray-200">
@@ -57,7 +86,7 @@ export default function Header() {
                                     to={item.to}
                                     className={`px-4 py-2 transition-colors duration-200 rounded-full
                                         ${
-                                            getIsActive(item.basePath) // 💡 Ahora usa la propiedad "basePath"
+                                            getIsActive(item.basePath)
                                                 ? "bg-blue-600 text-white"
                                                 : "text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
                                         }`}
@@ -119,7 +148,7 @@ export default function Header() {
 
             {/* Mobile Menu Panel */}
             <div
-                className={`fixed top-0 left-0 w-full h-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-md z-50 transition-transform duration-300
+                className={`fixed top-0 left-0 w-full h-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-md z-40 transition-transform duration-300
                 ${isMobileMenuOpen ? "translate-y-0" : "-translate-y-full"} md:hidden`}
             >
                 <div className="container mx-auto px-4 py-6 flex flex-col items-center">
@@ -139,7 +168,7 @@ export default function Header() {
                                             to={item.to}
                                             className={`px-4 py-2 transition-colors duration-200 rounded-full
                                                 ${
-                                                    getIsActive(item.basePath) // 💡 Ahora usa la propiedad "basePath"
+                                                    getIsActive(item.basePath)
                                                         ? "bg-blue-600 text-white"
                                                         : "text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
                                                 }`}
