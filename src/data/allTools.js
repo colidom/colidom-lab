@@ -120,7 +120,7 @@ export const allTools = [
     {
         id: "geocoding-tool",
         category: "utilities",
-        name: "Geocodificador Universal",
+        name: "Geocodificador",
         shortDescription: "Convierte direcciones a coordenadas y viceversa.",
         description:
             "Herramienta versátil que traduce direcciones a coordenadas geográficas (latitud y longitud) y viceversa. Soporta OpenStreetMap (por defecto) y Google Maps (opcional).",
