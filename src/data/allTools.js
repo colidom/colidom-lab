@@ -16,7 +16,7 @@ export const allTools = [
     {
         id: "json-formatter",
         category: "dev-tools",
-        name: "JSON Formatter",
+        name: "Formateador JSON",
         shortDescription: "Formatea y valida JSON de forma legible.",
         description:
             "Formatea y valida tu código JSON para una mejor legibilidad. Una herramienta esencial para organizar y depurar datos JSON de manera rápida y eficiente.",
@@ -34,7 +34,7 @@ export const allTools = [
     {
         id: "xml-formatter",
         category: "dev-tools",
-        name: "XML Formatter",
+        name: "Formateador XML",
         shortDescription: "Formatea y valida XML de forma legible y estructurada.",
         description: "Una herramienta de formateo de XML que te permite organizar y validar datos XML de manera rápida y sencilla.",
         features: ["Validación de sintaxis", "Indentación automática", "Limpieza de código"],
@@ -85,7 +85,7 @@ export const allTools = [
     {
         id: "color-palette",
         category: "dev-tools",
-        name: "Color Palette",
+        name: "Paleta de Color",
         shortDescription: "Genera paletas de colores armónicas a partir de un color base.",
         description:
             "Una herramienta completa para generar paletas de colores armónicas (monocromáticas, análogas, triádicas, etc.) usando el modelo HSL.",
@@ -103,7 +103,7 @@ export const allTools = [
     {
         id: "qr-generator",
         category: "utilities",
-        name: "QR Generator",
+        name: "Generador QR",
         shortDescription: "Genera códigos QR personalizados.",
         description: "Crea códigos QR personalizados para enlaces, textos, WiFi, vCards y más. Descarga en alta calidad PNG y SVG.",
         features: ["Logos personalizados", "Múltiples formatos de salida", "Exportación PNG/SVG", "Soporte WiFi y vCard"],
