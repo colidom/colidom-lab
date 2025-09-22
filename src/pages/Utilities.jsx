@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { utilityTools } from "../data/utilities";
+import { useParams, useNavigate } from "react-router-dom";
 
-// 💡 Recibe las props del desplazamiento
 export default function Utilities({ onScrollToSection, sectionToScroll }) {
-    const [activeToolId, setActiveToolId] = useState(utilityTools[0].id);
-    const activeTool = utilityTools.find((tool) => tool.id === activeToolId);
+    const { toolId } = useParams();
+    const navigate = useNavigate();
+    const activeTool = utilityTools.find((tool) => tool.id === toolId);
 
-    // 💡 Usa useEffect para desplazar la vista
     useEffect(() => {
-        if (sectionToScroll) {
-            setActiveToolId(sectionToScroll);
-            onScrollToSection();
+        if (!activeTool && utilityTools.length > 0) {
+            navigate(`/utilities/${utilityTools[0].id}`, { replace: true });
         }
-    }, [sectionToScroll, onScrollToSection]);
+    }, [activeTool, navigate]);
 
     return (
         <div id="utilidades" className="flex flex-col md:flex-row min-h-screen">
@@ -23,13 +22,13 @@ export default function Utilities({ onScrollToSection, sectionToScroll }) {
                         <button
                             key={tool.id}
                             id={tool.id}
-                            onClick={() => setActiveToolId(tool.id)}
+                            onClick={() => navigate(`/utilities/${tool.id}`)}
                             className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg transition-colors duration-200 text-left
-                                        ${
-                                            activeToolId === tool.id
-                                                ? "bg-blue-600 text-white shadow-md"
-                                                : "text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
-                                        }`}
+                                ${
+                                    toolId === tool.id
+                                        ? "bg-blue-600 text-white shadow-md"
+                                        : "text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                }`}
                         >
                             <tool.icon className="text-xl" />
                             <span className="text-base font-semibold">{tool.name}</span>

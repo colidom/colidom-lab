@@ -1,10 +1,11 @@
-import { MdFormatAlignLeft, MdColorLens, MdQrCode, MdCode, MdFormatIndentIncrease } from "react-icons/md";
+import { MdFormatAlignLeft, MdColorLens, MdQrCode, MdCode, MdFormatIndentIncrease, MdMap } from "react-icons/md";
 import JsonFormatter from "../components/JsonFormatter";
 import XmlFormatter from "../components/XmlFormatter";
 import Base64Converter from "../components/Base64Converter";
 import HexConverter from "../components/HexConverter";
 import ColorPalette from "../components/ColorPalette";
 import QrGenerator from "../components/QrGenerator";
+import GeocodingTool from "../components/GeocodingTool";
 
 export const categories = [
     { id: "dev-tools", label: "Dev Tools" },
@@ -114,6 +115,24 @@ export const allTools = [
             icon: "text-teal-500",
             title: "text-teal-500",
             button: "bg-teal-500 hover:bg-teal-600",
+        },
+    },
+    {
+        id: "geocoding-tool",
+        category: "utilities",
+        name: "Geocodificador Universal",
+        shortDescription: "Convierte direcciones a coordenadas y viceversa.",
+        description:
+            "Herramienta versátil que traduce direcciones a coordenadas geográficas (latitud y longitud) y viceversa. Soporta OpenStreetMap (por defecto) y Google Maps (opcional).",
+        features: ["Detección automática de entrada", "Soporte para OpenStreetMap y Google Maps", "Generación de CSV", "Conversión bidireccional"],
+        icon: MdMap,
+        component: GeocodingTool,
+        colorClasses: {
+            border: "border-indigo-500",
+            hoverBorder: "hover:border-indigo-500",
+            icon: "text-indigo-500",
+            title: "text-indigo-500",
+            button: "bg-indigo-500 hover:bg-indigo-600",
         },
     },
 ];
