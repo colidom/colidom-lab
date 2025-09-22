@@ -12,6 +12,9 @@ const initialData = {
 export default function QrGenerator() {
     const [qrData, setQrData] = useState(initialData);
     const canvasRef = useRef(null);
+    const [wifiSsid, setWifiSsid] = useState("");
+    const [wifiPassword, setWifiPassword] = useState("");
+    const [wifiSecurity, setWifiSecurity] = useState("WPA");
 
     // Generar el código QR cada vez que los datos cambian
     useEffect(() => {
@@ -39,7 +42,7 @@ export default function QrGenerator() {
         }
     }, [qrData]);
 
-    // Manejadores para los campos de entrada
+    // Manejadores para los campos de entrada generales
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setQrData((prev) => ({ ...prev, [name]: value }));
@@ -51,21 +54,50 @@ export default function QrGenerator() {
         switch (template) {
             case "url":
                 newContent = "https://colidom.dev";
+                // Limpiar campos de WiFi si se cambia a otra plantilla
+                setWifiSsid("");
+                setWifiPassword("");
+                setWifiSecurity("WPA");
                 break;
             case "wifi":
-                newContent = "WIFI:S:MyNetwork;T:WPA;P:MyPassword;;";
+                // Al seleccionar WiFi, usa los datos de los campos dedicados
+                // Esto también se actualizará automáticamente si los campos de WiFi cambian
+                newContent = `WIFI:S:${wifiSsid};T:${wifiSecurity};P:${wifiPassword};;`;
                 break;
             case "email":
                 newContent = "mailto:colidom@outlook.com";
+                // Limpiar campos de WiFi
+                setWifiSsid("");
+                setWifiPassword("");
+                setWifiSecurity("WPA");
                 break;
             case "phone":
                 newContent = "tel:+34123456789";
+                // Limpiar campos de WiFi
+                setWifiSsid("");
+                setWifiPassword("");
+                setWifiSecurity("WPA");
                 break;
             default:
                 newContent = "";
+                // Limpiar campos de WiFi
+                setWifiSsid("");
+                setWifiPassword("");
+                setWifiSecurity("WPA");
         }
         setQrData((prev) => ({ ...prev, content: newContent }));
     };
+
+    // Efecto para actualizar el QR cuando los campos de WiFi cambian, si la plantilla WiFi está activa
+    useEffect(() => {
+        if (qrData.content.startsWith("WIFI:S:")) {
+            // Verifica si la plantilla WiFi está en uso
+            setQrData((prev) => ({
+                ...prev,
+                content: `WIFI:S:${wifiSsid};T:${wifiSecurity};P:${wifiPassword};;`,
+            }));
+        }
+    }, [wifiSsid, wifiPassword, wifiSecurity, qrData.content]);
 
     const downloadQr = (format) => {
         if (!qrData.content) return;
@@ -152,6 +184,43 @@ export default function QrGenerator() {
                                 📱 Teléfono
                             </button>
                         </div>
+
+                        {(qrData.content.startsWith("WIFI:S:") || wifiSsid || wifiPassword) && (
+                            <div className="mt-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
+                                <div className="mb-3">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre de red (SSID)</label>
+                                    <input
+                                        type="text"
+                                        value={wifiSsid}
+                                        onChange={(e) => setWifiSsid(e.target.value)}
+                                        className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Nombre de la red Wifi"
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contraseña</label>
+                                    <input
+                                        type="text"
+                                        value={wifiPassword}
+                                        onChange={(e) => setWifiPassword(e.target.value)}
+                                        className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Contraseña de la red Wifi"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Seguridad</label>
+                                    <select
+                                        value={wifiSecurity}
+                                        onChange={(e) => setWifiSecurity(e.target.value)}
+                                        className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="WPA">WPA/WPA2</option>
+                                        <option value="WEP">WEP</option>
+                                        <option value="nopass">Sin contraseña</option>
+                                    </select>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Opciones de diseño */}
