@@ -33,12 +33,13 @@ export default function HexConverter() {
     return (
         <div className="space-y-6">
             <div>
-                <label htmlFor="hex-input" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="hex-input" className="block text-sm font-medium text-blue-600 dark:text-blue-400 mb-2">
                     Entrada
                 </label>
                 <textarea
                     id="hex-input"
-                    className="w-full h-32 px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-y"
+                    className="w-full h-32 px-4 py-3 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-y
+                        bg-white/30 dark:bg-gray-800/30 backdrop-blur-lg shadow-lg border-gray-200 dark:border-gray-700"
                     placeholder="Ingresa texto para codificar o una cadena hexadecimal para decodificar..."
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
@@ -48,14 +49,20 @@ export default function HexConverter() {
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
                 <button
                     onClick={handleEncode}
-                    className="flex-1 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-6 py-3 font-semibold rounded-lg shadow-lg transition-all transform
+                        bg-gradient-to-br from-blue-600 to-cyan-500 text-white
+                        hover:from-blue-700 hover:to-cyan-600 hover:scale-[1.02]
+                        disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     disabled={!inputValue}
                 >
                     Codificar a Hex
                 </button>
                 <button
                     onClick={handleDecode}
-                    className="flex-1 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-6 py-3 font-semibold rounded-lg shadow-lg transition-all transform
+                        bg-gradient-to-br from-green-600 to-emerald-500 text-white
+                        hover:from-green-700 hover:to-emerald-600 hover:scale-[1.02]
+                        disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     disabled={!inputValue}
                 >
                     Decodificar desde Hex
@@ -63,12 +70,13 @@ export default function HexConverter() {
             </div>
 
             <div>
-                <label htmlFor="hex-output" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="hex-output" className="block text-sm font-medium text-blue-600 dark:text-blue-400 mb-2">
                     Salida
                 </label>
                 <textarea
                     id="hex-output"
-                    className="w-full h-32 px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-y"
+                    className="w-full h-32 px-4 py-3 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-y
+                        bg-white/30 dark:bg-gray-800/30 backdrop-blur-lg shadow-lg border-gray-200 dark:border-gray-700"
                     placeholder="El resultado aparecerá aquí..."
                     value={outputValue}
                     readOnly
@@ -77,7 +85,9 @@ export default function HexConverter() {
 
             <button
                 onClick={clearFields}
-                className="w-full px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition-colors"
+                className="w-full px-6 py-3 font-semibold rounded-lg shadow-lg transition-all transform
+                    bg-gradient-to-br from-red-600 to-orange-500 text-white
+                    hover:from-red-700 hover:to-orange-600 hover:scale-[1.02]"
             >
                 Limpiar
             </button>

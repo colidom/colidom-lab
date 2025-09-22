@@ -16,7 +16,6 @@ export default function QrGenerator() {
     const [wifiPassword, setWifiPassword] = useState("");
     const [wifiSecurity, setWifiSecurity] = useState("WPA");
 
-    // Generar el código QR cada vez que los datos cambian
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -42,45 +41,37 @@ export default function QrGenerator() {
         }
     }, [qrData]);
 
-    // Manejadores para los campos de entrada generales
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setQrData((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Manejador para las plantillas rápidas
     const handleTemplateClick = (template) => {
         let newContent = "";
         switch (template) {
             case "url":
                 newContent = "https://colidom.dev";
-                // Limpiar campos de WiFi si se cambia a otra plantilla
                 setWifiSsid("");
                 setWifiPassword("");
                 setWifiSecurity("WPA");
                 break;
             case "wifi":
-                // Al seleccionar WiFi, usa los datos de los campos dedicados
-                // Esto también se actualizará automáticamente si los campos de WiFi cambian
                 newContent = `WIFI:S:${wifiSsid};T:${wifiSecurity};P:${wifiPassword};;`;
                 break;
             case "email":
                 newContent = "mailto:colidom@outlook.com";
-                // Limpiar campos de WiFi
                 setWifiSsid("");
                 setWifiPassword("");
                 setWifiSecurity("WPA");
                 break;
             case "phone":
                 newContent = "tel:+34123456789";
-                // Limpiar campos de WiFi
                 setWifiSsid("");
                 setWifiPassword("");
                 setWifiSecurity("WPA");
                 break;
             default:
                 newContent = "";
-                // Limpiar campos de WiFi
                 setWifiSsid("");
                 setWifiPassword("");
                 setWifiSecurity("WPA");
@@ -88,10 +79,8 @@ export default function QrGenerator() {
         setQrData((prev) => ({ ...prev, content: newContent }));
     };
 
-    // Efecto para actualizar el QR cuando los campos de WiFi cambian, si la plantilla WiFi está activa
     useEffect(() => {
         if (qrData.content.startsWith("WIFI:S:")) {
-            // Verifica si la plantilla WiFi está en uso
             setQrData((prev) => ({
                 ...prev,
                 content: `WIFI:S:${wifiSsid};T:${wifiSecurity};P:${wifiPassword};;`,
@@ -139,99 +128,114 @@ export default function QrGenerator() {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Panel de Configuración */}
-            <div className="space-y-6">
-                <div className="bg-gray-100 dark:bg-gray-700 rounded-xl p-6 shadow-md">
-                    <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Configuración</h2>
+            <div className="space-y-6 bg-white/30 dark:bg-gray-800/30 backdrop-blur-lg rounded-xl p-6 shadow-lg border-2 border-gray-200 dark:border-gray-700">
+                <h2 className="text-2xl font-bold mb-4 text-blue-600 dark:text-blue-400">Configuración</h2>
 
-                    {/* Contenido del QR */}
-                    <div className="mb-6">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contenido del QR</label>
-                        <textarea
-                            name="content"
-                            placeholder="Ingresa el texto, URL o datos para el código QR..."
-                            value={qrData.content}
-                            onChange={handleInputChange}
-                            className="w-full h-24 px-3 py-2 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                        ></textarea>
+                {/* Contenido del QR */}
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contenido del QR</label>
+                    <textarea
+                        name="content"
+                        placeholder="Ingresa el texto, URL o datos para el código QR..."
+                        value={qrData.content}
+                        onChange={handleInputChange}
+                        className="w-full h-24 px-3 py-2 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none
+                            bg-white/50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-500"
+                    ></textarea>
+                </div>
+
+                {/* Plantillas rápidas */}
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Plantillas rápidas</label>
+                    <div className="grid grid-cols-2 gap-4">
+                        <button
+                            onClick={() => handleTemplateClick("url")}
+                            className="p-3 text-sm font-semibold rounded-lg shadow-lg transition-all transform
+                                bg-gradient-to-br from-blue-600 to-cyan-500 text-white
+                                hover:from-blue-700 hover:to-cyan-600 hover:scale-[1.02]"
+                        >
+                            🌐 URL/Enlace
+                        </button>
+                        <button
+                            onClick={() => handleTemplateClick("wifi")}
+                            className="p-3 text-sm font-semibold rounded-lg shadow-lg transition-all transform
+                                bg-gradient-to-br from-green-600 to-emerald-500 text-white
+                                hover:from-green-700 hover:to-emerald-600 hover:scale-[1.02]"
+                        >
+                            📶 WiFi
+                        </button>
+                        <button
+                            onClick={() => handleTemplateClick("email")}
+                            className="p-3 text-sm font-semibold rounded-lg shadow-lg transition-all transform
+                                bg-gradient-to-br from-purple-600 to-fuchsia-500 text-white
+                                hover:from-purple-700 hover:to-fuchsia-600 hover:scale-[1.02]"
+                        >
+                            📧 Email
+                        </button>
+                        <button
+                            onClick={() => handleTemplateClick("phone")}
+                            className="p-3 text-sm font-semibold rounded-lg shadow-lg transition-all transform
+                                bg-gradient-to-br from-orange-600 to-yellow-500 text-white
+                                hover:from-orange-700 hover:to-yellow-600 hover:scale-[1.02]"
+                        >
+                            📱 Teléfono
+                        </button>
                     </div>
 
-                    {/* Plantillas rápidas */}
-                    <div className="mb-6">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Plantillas rápidas</label>
-                        <div className="grid grid-cols-2 gap-2">
-                            <button
-                                onClick={() => handleTemplateClick("url")}
-                                className="p-2 text-sm bg-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
-                            >
-                                🌐 URL/Enlace
-                            </button>
-                            <button
-                                onClick={() => handleTemplateClick("wifi")}
-                                className="p-2 text-sm bg-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
-                            >
-                                📶 WiFi
-                            </button>
-                            <button
-                                onClick={() => handleTemplateClick("email")}
-                                className="p-2 text-sm bg-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
-                            >
-                                📧 Email
-                            </button>
-                            <button
-                                onClick={() => handleTemplateClick("phone")}
-                                className="p-2 text-sm bg-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
-                            >
-                                📱 Teléfono
-                            </button>
-                        </div>
-
-                        {(qrData.content.startsWith("WIFI:S:") || wifiSsid || wifiPassword) && (
-                            <div className="mt-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
-                                <div className="mb-3">
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre de red (SSID)</label>
-                                    <input
-                                        type="text"
-                                        value={wifiSsid}
-                                        onChange={(e) => setWifiSsid(e.target.value)}
-                                        className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="Nombre de la red Wifi"
-                                    />
-                                </div>
-                                <div className="mb-3">
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contraseña</label>
-                                    <input
-                                        type="text"
-                                        value={wifiPassword}
-                                        onChange={(e) => setWifiPassword(e.target.value)}
-                                        className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="Contraseña de la red Wifi"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Seguridad</label>
-                                    <select
-                                        value={wifiSecurity}
-                                        onChange={(e) => setWifiSecurity(e.target.value)}
-                                        className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value="WPA">WPA/WPA2</option>
-                                        <option value="WEP">WEP</option>
-                                        <option value="nopass">Sin contraseña</option>
-                                    </select>
-                                </div>
+                    {(qrData.content.startsWith("WIFI:S:") || wifiSsid || wifiPassword) && (
+                        <div className="mt-4 p-4 rounded-lg bg-white/30 dark:bg-gray-800/30 backdrop-blur-md shadow-inner border border-gray-200 dark:border-gray-700">
+                            <div className="mb-3">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre de red (SSID)</label>
+                                <input
+                                    type="text"
+                                    value={wifiSsid}
+                                    onChange={(e) => setWifiSsid(e.target.value)}
+                                    className="w-full px-3 py-2 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all
+                                        bg-white/50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-500"
+                                    placeholder="Nombre de la red Wifi"
+                                />
                             </div>
-                        )}
-                    </div>
+                            <div className="mb-3">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contraseña</label>
+                                <input
+                                    type="text"
+                                    value={wifiPassword}
+                                    onChange={(e) => setWifiPassword(e.target.value)}
+                                    className="w-full px-3 py-2 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all
+                                        bg-white/50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-500"
+                                    placeholder="Contraseña de la red Wifi"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Seguridad</label>
+                                <select
+                                    value={wifiSecurity}
+                                    onChange={(e) => setWifiSecurity(e.target.value)}
+                                    className="w-full px-3 py-2 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all
+                                        bg-white/50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-500"
+                                >
+                                    <option value="WPA">WPA/WPA2</option>
+                                    <option value="WEP">WEP</option>
+                                    <option value="nopass">Sin contraseña</option>
+                                </select>
+                            </div>
+                        </div>
+                    )}
+                </div>
 
-                    {/* Opciones de diseño */}
-                    <div className="space-y-4">
-                        <div>
+                {/* Opciones de diseño */}
+                <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-blue-600 dark:text-blue-400">Opciones de Estilo</h3>
+                    {/* Contenedor Flexbox para vista de escritorio */}
+                    <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+                        <div className="flex-1">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tamaño</label>
                             <select
                                 name="size"
                                 value={qrData.size}
                                 onChange={handleInputChange}
-                                className="w-full px-3 py-2 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-3 py-2 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all
+                                    bg-white/50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-500"
                             >
                                 <option value="200">Pequeño (200x200)</option>
                                 <option value="300">Mediano (300x300)</option>
@@ -239,24 +243,24 @@ export default function QrGenerator() {
                                 <option value="500">Extra Grande (500x500)</option>
                             </select>
                         </div>
-                        <div>
+                        <div className="flex-1">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Color de fondo</label>
                             <input
                                 type="color"
                                 name="bgColor"
                                 value={qrData.bgColor}
                                 onChange={handleInputChange}
-                                className="w-full h-10 border border-gray-300 dark:border-gray-500 rounded-lg cursor-pointer bg-white dark:bg-gray-600"
+                                className="w-full h-10 border border-gray-300 dark:border-gray-500 rounded-lg cursor-pointer bg-white/50 dark:bg-gray-700/50"
                             />
                         </div>
-                        <div>
+                        <div className="flex-1">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Color del código</label>
                             <input
                                 type="color"
                                 name="fgColor"
                                 value={qrData.fgColor}
                                 onChange={handleInputChange}
-                                className="w-full h-10 border border-gray-300 dark:border-gray-500 rounded-lg cursor-pointer bg-white dark:bg-gray-600"
+                                className="w-full h-10 border border-gray-300 dark:border-gray-500 rounded-lg cursor-pointer bg-white/50 dark:bg-gray-700/50"
                             />
                         </div>
                     </div>
@@ -264,44 +268,48 @@ export default function QrGenerator() {
             </div>
 
             {/* Panel de Vista Previa y Descarga */}
-            <div className="space-y-6">
-                <div className="bg-gray-100 dark:bg-gray-700 rounded-xl p-6 shadow-md">
-                    <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Vista previa y descarga</h2>
+            <div className="space-y-6 bg-white/30 dark:bg-gray-800/30 backdrop-blur-lg rounded-xl p-6 shadow-lg border-2 border-gray-200 dark:border-gray-700">
+                <h2 className="text-2xl font-bold mb-4 text-blue-600 dark:text-blue-400">Vista previa y descarga</h2>
 
-                    {/* Área de Visualización */}
-                    <div className="flex flex-col items-center space-y-4">
-                        <div className="p-4 bg-white dark:bg-gray-600 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-500">
-                            <canvas ref={canvasRef} className="max-w-full h-auto"></canvas>
-                        </div>
-
-                        {/* Botones de Descarga */}
-                        <div className="flex space-x-3">
-                            <button
-                                onClick={() => downloadQr("png")}
-                                disabled={!qrData.content}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                            >
-                                <MdDownload className="w-4 h-4 inline mr-2" /> PNG
-                            </button>
-                            <button
-                                onClick={() => downloadQr("svg")}
-                                disabled={!qrData.content}
-                                className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                            >
-                                <MdDownload className="w-4 h-4 inline mr-2" /> SVG
-                            </button>
-                        </div>
-
-                        {/* Indicadores */}
-                        {qrData.content && (
-                            <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-                                <p>
-                                    Tamaño: {qrData.size}x{qrData.size}px
-                                </p>
-                                <p>Caracteres: {qrData.content.length}</p>
-                            </div>
-                        )}
+                {/* Área de Visualización */}
+                <div className="flex flex-col items-center space-y-4">
+                    <div className="p-4 bg-white dark:bg-gray-600 rounded-lg shadow-inner">
+                        <canvas ref={canvasRef} className="max-w-full h-auto rounded-lg"></canvas>
                     </div>
+
+                    {/* Botones de Descarga */}
+                    <div className="flex space-x-3">
+                        <button
+                            onClick={() => downloadQr("png")}
+                            disabled={!qrData.content}
+                            className="px-4 py-2 font-semibold rounded-lg shadow-lg transition-all transform
+                                bg-gradient-to-br from-blue-600 to-cyan-500 text-white
+                                hover:from-blue-700 hover:to-cyan-600 hover:scale-[1.02]
+                                disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        >
+                            <MdDownload className="w-4 h-4 inline mr-2" /> PNG
+                        </button>
+                        <button
+                            onClick={() => downloadQr("svg")}
+                            disabled={!qrData.content}
+                            className="px-4 py-2 font-semibold rounded-lg shadow-lg transition-all transform
+                                bg-gradient-to-br from-purple-600 to-fuchsia-500 text-white
+                                hover:from-purple-700 hover:to-fuchsia-600 hover:scale-[1.02]
+                                disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        >
+                            <MdDownload className="w-4 h-4 inline mr-2" /> SVG
+                        </button>
+                    </div>
+
+                    {/* Indicadores */}
+                    {qrData.content && (
+                        <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+                            <p>
+                                Tamaño: {qrData.size}x{qrData.size}px
+                            </p>
+                            <p>Caracteres: {qrData.content.length}</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

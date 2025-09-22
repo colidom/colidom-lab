@@ -73,9 +73,10 @@ export default function XmlFormatter() {
             <div className="flex flex-col md:flex-row md:items-start gap-8">
                 {/* Panel de entrada */}
                 <div className="w-full md:w-1/2 flex flex-col">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">XML sin formato</h3>
+                    <h3 className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-2">XML sin formato</h3>
                     <textarea
-                        className="w-full h-80 p-4 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                        className="w-full h-80 p-4 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200
+                            bg-white/30 dark:bg-gray-800/30 backdrop-blur-lg shadow-lg text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700"
                         placeholder={`<persona><nombre>colidom</nombre><edad>33</edad><ubicacion>Tenerife</ubicacion><proyectos><proyecto>Prioreisen</proyecto><proyecto>Colidom-lab</proyecto></proyectos></persona>`}
                         value={xmlInput}
                         onChange={handleInputChange}
@@ -83,8 +84,11 @@ export default function XmlFormatter() {
                 </div>
                 {/* Panel de salida */}
                 <div className="w-full md:w-1/2 flex flex-col">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">XML Formateado</h3>
-                    <div className="relative w-full h-80 overflow-auto border rounded-md bg-gray-50 dark:bg-gray-700 text-sm">
+                    <h3 className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-2">XML Formateado</h3>
+                    <div
+                        className="relative w-full h-80 overflow-auto border rounded-md text-sm
+                        bg-white/30 dark:bg-gray-800/30 backdrop-blur-lg shadow-lg border-gray-200 dark:border-gray-700"
+                    >
                         {/* Botón de copiar superpuesto */}
                         <div className="absolute top-2 right-2 z-10">
                             <button
@@ -114,7 +118,10 @@ export default function XmlFormatter() {
                 </div>
             </div>
             {error && (
-                <div className="w-full mt-4 p-4 rounded-md bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300">
+                <div
+                    className="w-full mt-4 p-4 rounded-md border border-red-500/30 backdrop-blur-sm
+                    bg-red-500/10 dark:bg-red-700/10 text-red-700 dark:text-red-300"
+                >
                     <h4 className="font-semibold">Error:</h4>
                     <p>{error}</p>
                 </div>

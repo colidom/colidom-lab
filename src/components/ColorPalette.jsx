@@ -37,7 +37,6 @@ function hexToHsl(hex) {
     return [h, s, l];
 }
 
-// Convierte HSL a Hex
 function hslToHex(h, s, l) {
     l /= 100;
     const a = (s * Math.min(l, 1 - l)) / 100;
@@ -63,28 +62,24 @@ export default function ColorPalette() {
 
         switch (type) {
             case "monochromatic":
-                // Monocromática: Varía la luminosidad del mismo tono y saturación
                 for (let i = -2; i <= 2; i++) {
                     const newL = Math.max(0, Math.min(100, l + i * 15));
                     colors.push(hslToHex(h, s, newL));
                 }
                 break;
             case "analogous":
-                // Análoga: Colores vecinos en el círculo cromático
                 for (let i = -2; i <= 2; i++) {
                     const newH = (h + i * 30 + 360) % 360;
                     colors.push(hslToHex(newH, s, l));
                 }
                 break;
             case "triadic":
-                // Triádica: 3 colores equidistantes
                 const h1 = h;
                 const h2 = (h + 120) % 360;
                 const h3 = (h + 240) % 360;
                 colors = [hslToHex(h1, s, l), hslToHex(h2, s, l), hslToHex(h3, s, l)];
                 break;
             case "complementary":
-                // Complementaria: Colores opuestos
                 const hComp = (h + 180) % 360;
                 colors = [
                     hslToHex(h, s, Math.min(100, l + 15)),
@@ -109,8 +104,12 @@ export default function ColorPalette() {
 
     return (
         <div className="space-y-8">
-            <div className="flex flex-col sm:flex-row items-center sm:space-x-4 space-y-4 sm:space-y-0 p-6 bg-gray-100 dark:bg-gray-700 rounded-xl shadow-md">
-                <label className="text-lg font-medium text-gray-700 dark:text-gray-300">Color base:</label>
+            {/* Contenedor del color base */}
+            <div
+                className="flex flex-col sm:flex-row items-center sm:space-x-4 space-y-4 sm:space-y-0 p-6 rounded-xl shadow-lg border-2 border-blue-500/30
+                bg-white/30 dark:bg-gray-800/30 backdrop-blur-lg"
+            >
+                <label className="text-lg font-medium text-blue-600 dark:text-blue-400">Color base:</label>
                 <input
                     type="color"
                     value={baseColor}
@@ -120,9 +119,14 @@ export default function ColorPalette() {
                 <span className="text-xl font-mono text-gray-900 dark:text-white">{baseColor.toUpperCase()}</span>
             </div>
 
+            {/* Contenedores de las paletas */}
             {Object.keys(palettes).map((paletteName) => (
-                <div key={paletteName} className="p-6 bg-gray-100 dark:bg-gray-700 rounded-xl shadow-md">
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{paletteName}</h3>
+                <div
+                    key={paletteName}
+                    className="p-6 rounded-xl shadow-lg border-2 border-gray-200 dark:border-gray-700
+                    bg-white/30 dark:bg-gray-800/30 backdrop-blur-lg"
+                >
+                    <h3 className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-4">{paletteName}</h3>
                     <div className="flex flex-wrap gap-4 justify-center">
                         {palettes[paletteName].map((color, index) => (
                             <div key={index} className="flex flex-col items-center">

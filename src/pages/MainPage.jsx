@@ -1,9 +1,7 @@
-// src/pages/MainPage.jsx
 import React, { useState } from "react";
 import ToolCard from "../components/ToolCard";
-import { allTools, categories } from "../data/allTools"; // 💡 Importamos los datos unificados
+import { allTools, categories } from "../data/allTools";
 
-// 💡 El componente ahora recibe 'onPageChange' como prop
 const MainPage = ({ onPageChange }) => {
     const [searchTerm, setSearchTerm] = useState("");
 
@@ -21,20 +19,18 @@ const MainPage = ({ onPageChange }) => {
             id="inicio"
             className="container mx-auto px-6 md:px-20 max-w-7xl pt-20 pb-12 min-h-[calc(100vh-100px)] flex flex-col items-center justify-center text-center"
         >
-            {/* ... (Sección de Bienvenida y Buscador - sin cambios) */}
             <div className="w-full max-w-2xl mb-12">
                 <h1 className="text-4xl mt-12 sm:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">Colidom-Lab</h1>
                 <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-8">Un laboratorio de herramientas para desarrolladores.</p>
                 <input
                     type="text"
                     placeholder="Buscar herramientas..."
-                    className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+                    className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm shadow-md text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
 
-            {/* 💡 Agrupamos las herramientas por categoría */}
             <div className="w-full space-y-12">
                 {groupedTools.map((group) => {
                     if (group.tools.length === 0) return null;
@@ -45,7 +41,6 @@ const MainPage = ({ onPageChange }) => {
                             </h2>
                             <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {group.tools.map((tool) => (
-                                    // 💡 Pasamos 'onPageChange' al ToolCard
                                     <ToolCard key={tool.id} tool={tool} onPageChange={onPageChange} />
                                 ))}
                             </div>

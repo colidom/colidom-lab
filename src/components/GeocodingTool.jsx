@@ -172,19 +172,20 @@ export default function GeocodingTool() {
     };
 
     return (
-        <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Geocodificador Universal</h2>
+        <div className="space-y-6 bg-white/30 dark:bg-gray-800/30 backdrop-blur-lg rounded-xl p-6 shadow-lg border-2 border-gray-200 dark:border-gray-700">
+            <h2 className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-4">Geocodificador Universal</h2>
             <p className="text-gray-700 dark:text-gray-300">
                 Convierte listas de direcciones a coordenadas y viceversa. Ingresa tus datos separados por punto y coma.
             </p>
 
-            <div className="bg-gray-100 dark:bg-gray-700 rounded-xl p-6 shadow-md">
+            <div className="space-y-4">
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Introduce direcciones o coordenadas (separadas por punto y coma)
                     </label>
                     <textarea
-                        className="w-full h-40 p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg resize-none text-gray-900 dark:text-gray-100"
+                        className="w-full h-40 px-3 py-2 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none
+                            bg-white/50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-500"
                         placeholder={`Ejemplos:
 Calle Mayor 1, Madrid;
 40.7128, -74.0060;`}
@@ -197,7 +198,8 @@ Calle Mayor 1, Madrid;
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Clave de API de Google Maps (Opcional)</label>
                     <input
                         type="text"
-                        className="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100"
+                        className="w-full px-3 py-2 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all
+                            bg-white/50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-500"
                         placeholder="Ingresa tu clave de API para usar el servicio de Google"
                         value={googleApiKey}
                         onChange={(e) => setGoogleApiKey(e.target.value)}
@@ -208,7 +210,10 @@ Calle Mayor 1, Madrid;
                     <button
                         onClick={processInputs}
                         disabled={isProcessing || !rawInput.trim()}
-                        className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="px-6 py-2 font-semibold rounded-lg shadow-lg transition-all transform
+                                bg-gradient-to-br from-blue-600 to-cyan-500 text-white
+                                hover:from-blue-700 hover:to-cyan-600 hover:scale-[1.02]
+                                disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     >
                         {isProcessing ? "Procesando..." : "Iniciar Conversión"}
                     </button>
@@ -216,7 +221,7 @@ Calle Mayor 1, Madrid;
             </div>
 
             {statusMessage && (
-                <div className="bg-gray-100 dark:bg-gray-700 rounded-xl p-6 shadow-md text-center">
+                <div className="bg-white/30 dark:bg-gray-800/30 backdrop-blur-md rounded-xl p-4 shadow-inner border border-gray-200 dark:border-gray-700 text-center">
                     <p className="text-gray-700 dark:text-gray-300 font-medium">{statusMessage}</p>
                     {isProcessing && (
                         <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-600 mt-4">
