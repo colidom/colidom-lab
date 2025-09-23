@@ -10,7 +10,7 @@ import GeocodingTool from "../components/GeocodingTool";
 export const categories = [
     { id: "dev-tools", label: "Dev Tools" },
     { id: "utilities", label: "Utilities" },
-    { id: "media", label: "Media" },
+    //{ id: "media", label: "Media" },
 ];
 
 export const allTools = [
