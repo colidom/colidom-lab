@@ -173,14 +173,9 @@ export default function GeocodingTool() {
 
     return (
         <div className="space-y-6 bg-white/30 dark:bg-gray-800/30 backdrop-blur-lg rounded-xl p-6 shadow-lg border-2 border-gray-200 dark:border-gray-700">
-            <h2 className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-4">Geocodificador Universal</h2>
-            <p className="text-gray-700 dark:text-gray-300">
-                Convierte listas de direcciones a coordenadas y viceversa. Ingresa tus datos separados por punto y coma.
-            </p>
-
             <div className="space-y-4">
                 <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-blue-600 dark:text-blue-400 mb-2">
                         Introduce direcciones o coordenadas (separadas por punto y coma)
                     </label>
                     <textarea
@@ -195,7 +190,7 @@ Calle Mayor 1, Madrid;
                 </div>
 
                 <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Clave de API de Google Maps (Opcional)</label>
+                    <label className="block text-sm font-medium text-blue-600 dark:text-blue-400 mb-2">Clave de API de Google Maps (Opcional)</label>
                     <input
                         type="text"
                         className="w-full px-3 py-2 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all
