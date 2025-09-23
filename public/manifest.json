@@ -4,9 +4,9 @@
     "description": "Una colección de herramientas útiles para desarrolladores web y utilidades cotidianas. Formateadores, codificadores, convertidores y más, todo en un solo lugar.",
     "icons": [
         {
-            "src": "colidom-lab-favicon",
+            "src": "colidom-lab-favicon.png",
             "type": "image/png",
-            "sizes": "512x512"
+            "sizes": "192x192"
         }
     ],
     "start_url": ".",
