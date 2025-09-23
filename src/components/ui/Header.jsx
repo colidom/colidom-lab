@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import ThemeIcon from "./ThemeIcon";
-import { useTheme } from "../hooks/useTheme";
+import { useTheme } from "../../hooks/useTheme";
 import { MdMenu, MdClose } from "react-icons/md";
 // Importamos directamente las categorías y herramientas desde el archivo principal
-import { categories, allTools } from "../data/allTools";
+import { categories, allTools } from "../../data/allTools";
 
 // Generamos los navItems dinámicamente
 const navItems = categories.map((cat) => {

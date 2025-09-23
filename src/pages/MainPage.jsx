@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ToolCard from "../components/ToolCard";
+import ToolCard from "../components/ui/ToolCard";
 import { allTools, categories } from "../data/allTools";
 
 const MainPage = ({ onPageChange }) => {

@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
+import Header from "./components/ui/Header";
+import Footer from "./components/ui/Footer";
 import MainPage from "./pages/MainPage";
 import ToolPage from "./pages/ToolPage";
 import { allTools } from "./data/allTools";

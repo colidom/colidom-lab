@@ -1,11 +1,11 @@
 import { MdFormatAlignLeft, MdColorLens, MdQrCode, MdCode, MdFormatIndentIncrease, MdMap } from "react-icons/md";
-import JsonFormatter from "../components/JsonFormatter";
-import XmlFormatter from "../components/XmlFormatter";
-import Base64Converter from "../components/Base64Converter";
-import HexConverter from "../components/HexConverter";
-import ColorPalette from "../components/ColorPalette";
-import QrGenerator from "../components/QrGenerator";
-import GeocodingTool from "../components/GeocodingTool";
+import JsonFormatter from "../components/tools/JsonFormatter";
+import XmlFormatter from "../components/tools/XmlFormatter";
+import Base64Converter from "../components/tools/Base64Converter";
+import HexConverter from "../components/tools/HexConverter";
+import ColorPalette from "../components/tools/ColorPalette";
+import QrGenerator from "../components/tools/QrGenerator";
+import GeocodingTool from "../components/tools/GeocodingTool";
 
 export const categories = [
     { id: "dev-tools", label: "Dev Tools" },
