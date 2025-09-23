@@ -3,13 +3,26 @@ import { Link, useLocation } from "react-router-dom";
 import ThemeIcon from "./ThemeIcon";
 import { useTheme } from "../hooks/useTheme";
 import { MdMenu, MdClose } from "react-icons/md";
-import { devTools } from "../data/devtools";
-import { utilityTools } from "../data/utilities";
+// Importamos directamente las categorías y herramientas desde el archivo principal
+import { categories, allTools } from "../data/allTools";
 
-const navItems = [
+// Generamos los navItems dinámicamente
+const navItems = categories.map((cat) => {
+    // Busca la primera herramienta para esa categoría para crear la URL
+    const firstToolId = allTools.find((tool) => tool.category === cat.id)?.id;
+    return {
+        id: cat.id,
+        label: cat.label,
+        to: `/${cat.id}/${firstToolId}`,
+        basePath: `/${cat.id}`,
+        type: "internal",
+    };
+});
+
+// Añadimos los elementos estáticos al principio y al final
+const finalNavItems = [
     { id: "inicio", label: "Inicio", to: "/", basePath: "/", type: "internal" },
-    { id: "dev-tools", label: "Dev Tools", to: `/dev-tools/${devTools[0].id}`, basePath: "/dev-tools", type: "internal" },
-    { id: "utilities", label: "Utilidades", to: `/utilities/${utilityTools[0].id}`, basePath: "/utilities", type: "internal" },
+    ...navItems,
     { id: "contacto", label: "Contacto", type: "external", href: "mailto:colidom@outlook.com" },
 ];
 
@@ -76,7 +89,7 @@ export default function Header() {
 
                 {/* Desktop Navigation - hidden on small screens */}
                 <div className="hidden md:flex items-center space-x-4">
-                    {navItems.map((item) => {
+                    {finalNavItems.map((item) => {
                         if (item.type === "internal") {
                             return (
                                 <Link
@@ -157,7 +170,7 @@ export default function Header() {
                         </button>
                     </div>
                     <ul className="flex flex-col items-center mt-8 space-y-4 text-xl">
-                        {navItems.map((item) => {
+                        {finalNavItems.map((item) => {
                             if (item.type === "internal") {
                                 return (
                                     <li key={item.id}>
