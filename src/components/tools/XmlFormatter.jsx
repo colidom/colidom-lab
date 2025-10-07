@@ -73,9 +73,9 @@ export default function XmlFormatter() {
             <div className="flex flex-col md:flex-row md:items-start gap-8">
                 {/* Panel de entrada */}
                 <div className="w-full md:w-1/2 flex flex-col">
-                    <h3 className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-2">XML sin formato</h3>
+                    <h3 className="text-lg font-semibold text-orange-600 dark:text-orange-400 mb-2">XML sin formato</h3>
                     <textarea
-                        className="w-full h-80 p-4 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200
+                        className="w-full h-80 p-4 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors duration-200
                             bg-white/30 dark:bg-gray-800/30 backdrop-blur-lg shadow-lg text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700"
                         placeholder={`<persona><nombre>colidom</nombre><edad>33</edad><ubicacion>Tenerife</ubicacion><proyectos><proyecto>Prioreisen</proyecto><proyecto>Colidom-lab</proyecto></proyectos></persona>`}
                         value={xmlInput}
@@ -84,7 +84,7 @@ export default function XmlFormatter() {
                 </div>
                 {/* Panel de salida */}
                 <div className="w-full md:w-1/2 flex flex-col">
-                    <h3 className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-2">XML Formateado</h3>
+                    <h3 className="text-lg font-semibold text-orange-600 dark:text-orange-400 mb-2">XML Formateado</h3>
                     <div
                         className="relative w-full h-80 overflow-auto border rounded-md text-sm
                         bg-white/30 dark:bg-gray-800/30 backdrop-blur-lg shadow-lg border-gray-200 dark:border-gray-700"
