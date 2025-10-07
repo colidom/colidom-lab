@@ -13,3 +13,242 @@ body {
 code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
+
+/* ==================== ESTILOS COMUNES PARA HERRAMIENTAS ==================== */
+
+@layer components {
+    /* Botones principales - Acciones primarias */
+    .btn-primary {
+        @apply px-6 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 transform
+            bg-gradient-to-r from-blue-600 to-blue-700 text-white
+            hover:from-blue-700 hover:to-blue-800 hover:shadow-xl hover:scale-105
+            active:scale-95
+            disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-lg;
+    }
+
+    /* Botones secundarios - Acciones secundarias */
+    .btn-secondary {
+        @apply px-6 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 transform
+            bg-gradient-to-r from-purple-600 to-purple-700 text-white
+            hover:from-purple-700 hover:to-purple-800 hover:shadow-xl hover:scale-105
+            active:scale-95
+            disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-lg;
+    }
+
+    /* Botones de acción positiva (success) */
+    .btn-success {
+        @apply px-6 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 transform
+            bg-gradient-to-r from-green-600 to-emerald-600 text-white
+            hover:from-green-700 hover:to-emerald-700 hover:shadow-xl hover:scale-105
+            active:scale-95
+            disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-lg;
+    }
+
+    /* Botones de advertencia/peligro */
+    .btn-danger {
+        @apply px-6 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 transform
+            bg-gradient-to-r from-red-600 to-orange-600 text-white
+            hover:from-red-700 hover:to-orange-700 hover:shadow-xl hover:scale-105
+            active:scale-95
+            disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-lg;
+    }
+
+    /* Botones de información/neutral */
+    .btn-info {
+        @apply px-6 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 transform
+            bg-gradient-to-r from-cyan-600 to-teal-600 text-white
+            hover:from-cyan-700 hover:to-teal-700 hover:shadow-xl hover:scale-105
+            active:scale-95
+            disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-lg;
+    }
+
+    /* Botones pequeños - Para iconos o acciones compactas */
+    .btn-icon {
+        @apply p-2 rounded-lg transition-all duration-200
+            bg-white/50 dark:bg-gray-700/50 hover:bg-white/70 dark:hover:bg-gray-700/70
+            text-gray-700 dark:text-gray-300 hover:scale-110
+            active:scale-95;
+    }
+
+    /* Inputs y textareas consistentes */
+    .input-field {
+        @apply w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 
+            bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm
+            text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
+            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+            transition-all duration-200;
+    }
+
+    /* Textarea específica */
+    .textarea-field {
+        @apply input-field resize-none;
+    }
+
+    /* Contenedores de sección */
+    .section-container {
+        @apply p-6 rounded-xl bg-white/40 dark:bg-gray-800/40 backdrop-blur-xl 
+            shadow-lg border border-gray-200 dark:border-gray-700
+            transition-all duration-300;
+    }
+
+    /* Labels consistentes */
+    .label-text {
+        @apply block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2;
+    }
+
+    /* Contenedor de resultado/output */
+    .output-container {
+        @apply p-4 rounded-lg bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm
+            border border-gray-200 dark:border-gray-700;
+    }
+
+    /* Código/monospace */
+    .code-text {
+        @apply font-mono text-sm text-gray-800 dark:text-gray-200 break-all;
+    }
+}
+
+/* Animaciones personalizadas */
+@keyframes fade-in-out {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    80% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
+    }
+}
+
+@keyframes slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scale-in {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.animate-fade-in-out {
+    animation: fade-in-out 2s ease-in-out;
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-slide-in {
+    animation: slide-in 0.5s ease-out;
+}
+
+.animate-scale-in {
+    animation: scale-in 0.3s ease-out;
+}
+
+/* Efectos de glassmorphism mejorados */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass-effect {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.5);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.7);
+}
+
+.dark ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.6);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.8);
+}
+
+/* Efectos de gradiente */
+.gradient-border {
+    position: relative;
+    background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899);
+    padding: 2px;
+    border-radius: 12px;
+}
+
+.gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    padding: 2px;
+    background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}

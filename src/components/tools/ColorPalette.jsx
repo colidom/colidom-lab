@@ -104,35 +104,35 @@ export default function ColorPalette() {
 
     return (
         <div className="space-y-8">
-            {/* Contenedor del color base */}
-            <div
-                className="flex flex-col sm:flex-row items-center sm:space-x-4 space-y-4 sm:space-y-0 p-6 rounded-xl shadow-lg border-2 border-blue-500/30
-                bg-white/30 dark:bg-gray-800/30 backdrop-blur-lg"
-            >
-                <label className="text-lg font-medium text-blue-600 dark:text-blue-400">Color base:</label>
-                <input
-                    type="color"
-                    value={baseColor}
-                    onChange={(e) => setBaseColor(e.target.value)}
-                    className="w-24 h-12 border-2 border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer"
-                />
-                <span className="text-xl font-mono text-gray-900 dark:text-white">{baseColor.toUpperCase()}</span>
+            {/* Selector de color base */}
+            <div className="section-container">
+                <div className="flex flex-col sm:flex-row items-center sm:space-x-4 space-y-4 sm:space-y-0">
+                    <label className="label-text text-base">Color base:</label>
+                    <input
+                        type="color"
+                        value={baseColor}
+                        onChange={(e) => setBaseColor(e.target.value)}
+                        className="w-24 h-12 border-2 border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer transition-transform hover:scale-105"
+                    />
+                    <span className="text-xl font-mono text-gray-900 dark:text-white">{baseColor.toUpperCase()}</span>
+                </div>
             </div>
 
-            {/* Contenedores de las paletas */}
+            {/* Paletas generadas */}
             {Object.keys(palettes).map((paletteName) => (
-                <div
-                    key={paletteName}
-                    className="p-6 rounded-xl shadow-lg border-2 border-gray-200 dark:border-gray-700
-                    bg-white/30 dark:bg-gray-800/30 backdrop-blur-lg"
-                >
-                    <h3 className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-4">{paletteName}</h3>
+                <div key={paletteName} className="section-container">
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{paletteName}</h3>
                     <div className="flex flex-wrap gap-4 justify-center">
                         {palettes[paletteName].map((color, index) => (
-                            <div key={index} className="flex flex-col items-center">
+                            <div key={index} className="flex flex-col items-center group">
                                 <div
-                                    className="w-20 h-20 rounded-full shadow-lg border border-gray-300 dark:border-gray-600 transition-transform hover:scale-105"
+                                    className="w-20 h-20 rounded-full shadow-lg border-2 border-gray-300 dark:border-gray-600 
+                                        transition-transform hover:scale-110 cursor-pointer"
                                     style={{ backgroundColor: color }}
+                                    title={`Click para copiar ${color}`}
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(color);
+                                    }}
                                 ></div>
                                 <span className="mt-2 text-xs font-mono text-gray-700 dark:text-gray-300">{color.toUpperCase()}</span>
                             </div>

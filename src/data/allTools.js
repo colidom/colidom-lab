@@ -1,4 +1,19 @@
-import { MdFormatAlignLeft, MdColorLens, MdQrCode, MdCode, MdFormatIndentIncrease, MdMap } from "react-icons/md";
+import { 
+    MdFormatAlignLeft, 
+    MdColorLens, 
+    MdQrCode, 
+    MdCode, 
+    MdFormatIndentIncrease, 
+    MdMap,
+    MdFingerprint,
+    MdLock,
+    MdVpnKey,
+    MdToken,
+    MdSchedule,
+    MdTextFields
+} from "react-icons/md";
+
+// Herramientas existentes
 import JsonFormatter from "../components/tools/JsonFormatter";
 import XmlFormatter from "../components/tools/XmlFormatter";
 import Base64Converter from "../components/tools/Base64Converter";
@@ -7,13 +22,22 @@ import ColorPalette from "../components/tools/ColorPalette";
 import QrGenerator from "../components/tools/QrGenerator";
 import GeocodingTool from "../components/tools/GeocodingTool";
 
+// Nuevas herramientas
+import UuidGenerator from "../components/tools/UuidGenerator";
+import HashGenerator from "../components/tools/HashGenerator";
+import PasswordGenerator from "../components/tools/PasswordGenerator";
+import JwtDecoder from "../components/tools/JwtDecoder";
+import TimestampConverter from "../components/tools/TimestampConverter";
+import RegexTester from "../components/tools/RegexTester";
+
 export const categories = [
     { id: "dev-tools", label: "Dev Tools" },
     { id: "utilities", label: "Utilidades" },
-    //{ id: "media", label: "Media" },
+    { id: "security", label: "Seguridad" },
 ];
 
 export const allTools = [
+    // ==================== DEV TOOLS ====================
     {
         id: "json-formatter",
         category: "dev-tools",
@@ -102,6 +126,42 @@ export const allTools = [
         },
     },
     {
+        id: "regex-tester",
+        category: "dev-tools",
+        name: "Regex Tester",
+        shortDescription: "Prueba y valida expresiones regulares en tiempo real.",
+        description: "Herramienta completa para probar expresiones regulares con visualización de coincidencias, grupos de captura y patrones comunes predefinidos.",
+        features: ["Resaltado de coincidencias", "Patrones comunes", "Soporte de flags", "Detalles de grupos"],
+        icon: MdTextFields,
+        component: RegexTester,
+        colorClasses: {
+            border: "border-rose-500",
+            hoverBorder: "hover:border-rose-500",
+            icon: "text-rose-500",
+            title: "text-rose-500",
+            button: "bg-rose-500 hover:bg-rose-600",
+        },
+    },
+    {
+        id: "timestamp-converter",
+        category: "dev-tools",
+        name: "Timestamp Converter",
+        shortDescription: "Convierte entre fechas y timestamps Unix.",
+        description: "Convierte fácilmente entre fechas legibles y timestamps Unix (segundos y milisegundos). Incluye tiempo actual en vivo.",
+        features: ["Bidireccional", "Múltiples formatos", "Tiempo en vivo", "ISO 8601"],
+        icon: MdSchedule,
+        component: TimestampConverter,
+        colorClasses: {
+            border: "border-teal-500",
+            hoverBorder: "hover:border-teal-500",
+            icon: "text-teal-500",
+            title: "text-teal-500",
+            button: "bg-teal-500 hover:bg-teal-600",
+        },
+    },
+
+    // ==================== UTILITIES ====================
+    {
         id: "qr-generator",
         category: "utilities",
         name: "Generador QR",
@@ -111,11 +171,11 @@ export const allTools = [
         icon: MdQrCode,
         component: QrGenerator,
         colorClasses: {
-            border: "border-teal-500",
-            hoverBorder: "hover:border-teal-500",
-            icon: "text-teal-500",
-            title: "text-teal-500",
-            button: "bg-teal-500 hover:bg-teal-600",
+            border: "border-emerald-500",
+            hoverBorder: "hover:border-emerald-500",
+            icon: "text-emerald-500",
+            title: "text-emerald-500",
+            button: "bg-emerald-500 hover:bg-emerald-600",
         },
     },
     {
@@ -134,6 +194,76 @@ export const allTools = [
             icon: "text-indigo-500",
             title: "text-indigo-500",
             button: "bg-indigo-500 hover:bg-indigo-600",
+        },
+    },
+    {
+        id: "uuid-generator",
+        category: "utilities",
+        name: "UUID Generator",
+        shortDescription: "Genera identificadores únicos universales (UUID).",
+        description: "Genera UUIDs v4 (aleatorios) o v1 (basados en timestamp) en cantidad. Perfectos para identificadores únicos en bases de datos y APIs.",
+        features: ["UUID v4 y v1", "Generación en lote", "Copia individual o masiva", "Explicación de formatos"],
+        icon: MdFingerprint,
+        component: UuidGenerator,
+        colorClasses: {
+            border: "border-green-500",
+            hoverBorder: "hover:border-green-500",
+            icon: "text-green-500",
+            title: "text-green-500",
+            button: "bg-green-500 hover:bg-green-600",
+        },
+    },
+
+    // ==================== SECURITY ====================
+    {
+        id: "hash-generator",
+        category: "security",
+        name: "Hash Generator",
+        shortDescription: "Genera hashes criptográficos de texto.",
+        description: "Genera hashes SHA-1, SHA-256, SHA-384 y SHA-512 de cualquier texto. Útil para verificación de integridad y checksums.",
+        features: ["Múltiples algoritmos SHA", "Generación instantánea", "Comparación de longitudes", "Información sobre cada algoritmo"],
+        icon: MdLock,
+        component: HashGenerator,
+        colorClasses: {
+            border: "border-amber-500",
+            hoverBorder: "hover:border-amber-500",
+            icon: "text-amber-500",
+            title: "text-amber-500",
+            button: "bg-amber-500 hover:bg-amber-600",
+        },
+    },
+    {
+        id: "password-generator",
+        category: "security",
+        name: "Password Generator",
+        shortDescription: "Genera contraseñas seguras y personalizables.",
+        description: "Crea contraseñas fuertes con opciones personalizables. Incluye medidor de fortaleza y consejos de seguridad.",
+        features: ["Longitud ajustable", "Medidor de fortaleza", "Tipos de caracteres configurables", "Generación instantánea"],
+        icon: MdVpnKey,
+        component: PasswordGenerator,
+        colorClasses: {
+            border: "border-indigo-500",
+            hoverBorder: "hover:border-indigo-500",
+            icon: "text-indigo-500",
+            title: "text-indigo-500",
+            button: "bg-indigo-500 hover:bg-indigo-600",
+        },
+    },
+    {
+        id: "jwt-decoder",
+        category: "security",
+        name: "JWT Decoder",
+        shortDescription: "Decodifica y analiza tokens JWT.",
+        description: "Decodifica tokens JWT y muestra header, payload y signature. Verifica expiración y muestra claims comunes.",
+        features: ["Decodificación completa", "Verificación de expiración", "Visualización de claims", "Sin validación de firma"],
+        icon: MdToken,
+        component: JwtDecoder,
+        colorClasses: {
+            border: "border-cyan-500",
+            hoverBorder: "hover:border-cyan-500",
+            icon: "text-cyan-500",
+            title: "text-cyan-500",
+            button: "bg-cyan-500 hover:bg-cyan-600",
         },
     },
 ];
