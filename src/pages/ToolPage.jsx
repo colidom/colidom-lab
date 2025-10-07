@@ -1,11 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../components/ui/Sidebar";
 import { allTools } from "../data/allTools";
+import { MdMenu, MdClose } from "react-icons/md";
 
 export default function ToolPage() {
     const { toolId, categoryId } = useParams();
     const navigate = useNavigate();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     const toolsInCategory = allTools.filter((tool) => tool.category === categoryId);
     const activeTool = toolsInCategory.find((tool) => tool.id === toolId);
@@ -21,6 +23,19 @@ export default function ToolPage() {
         }
     }, [activeTool, navigate, categoryId, toolsInCategory]);
 
+    // Cerrar sidebar en móviles por defecto
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 768) {
+                setIsSidebarOpen(false);
+            }
+        };
+
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     if (!activeTool) {
         return null;
     }
@@ -28,22 +43,52 @@ export default function ToolPage() {
     const ActiveToolComponent = activeTool.component;
 
     return (
-        <div id={categoryId} className="flex flex-col md:flex-row min-h-screen">
-            <Sidebar navItems={toolsInCategory} activeToolId={toolId} basePath={`/${categoryId}`} />
+        <div id={categoryId} className="flex flex-col md:flex-row relative min-h-screen">
+            {/* Botón para toggle sidebar */}
+            <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className={`
+                    fixed left-4 z-50 p-3 rounded-xl 
+                    bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl 
+                    shadow-lg border border-gray-200 dark:border-gray-700
+                    hover:scale-110 transition-all duration-200 group
+                    ${isSidebarOpen ? 'top-24' : 'top-24'}
+                `}
+                aria-label={isSidebarOpen ? "Ocultar menú" : "Mostrar menú"}
+                title={isSidebarOpen ? "Ocultar menú (⌘+B)" : "Mostrar menú (⌘+B)"}
+            >
+                {isSidebarOpen ? (
+                    <MdClose className="text-2xl text-gray-700 dark:text-gray-300 group-hover:rotate-90 transition-transform duration-200" />
+                ) : (
+                    <MdMenu className="text-2xl text-gray-700 dark:text-gray-300 group-hover:scale-110 transition-transform duration-200" />
+                )}
+            </button>
 
-            <div className="flex-1 md:ml-64 p-6 md:p-12 mt-20 transition-all duration-300">
-                <div className="container mx-auto max-w-7xl animate-slide-in">
+            <Sidebar 
+                navItems={toolsInCategory} 
+                activeToolId={toolId} 
+                basePath={`/${categoryId}`}
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+            />
+
+            <div className={`
+                flex-1 p-6 md:p-12 pt-32 min-h-screen 
+                transition-all duration-300 ease-in-out
+                ${isSidebarOpen ? 'md:ml-72' : 'md:ml-0'}
+            `}>
+                <div className="container mx-auto max-w-7xl animate-slide-in pb-12">
                     {/* Header de la herramienta */}
                     <div className="mb-8">
                         <div className="flex items-center gap-4 mb-4">
                             <div className={`p-4 rounded-2xl bg-gradient-to-br ${activeTool.colorClasses.border.replace('border-', 'from-')}-500/20 ${activeTool.colorClasses.border.replace('border-', 'to-')}-600/20 backdrop-blur-sm`}>
                                 <activeTool.icon className={`text-4xl ${activeTool.colorClasses.icon}`} />
                             </div>
-                            <div>
-                                <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-2">
+                            <div className="flex-1">
+                                <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white mb-2">
                                     {activeTool.name}
                                 </h1>
-                                <p className="text-gray-600 dark:text-gray-400 text-lg">
+                                <p className="text-gray-600 dark:text-gray-400 text-base md:text-lg">
                                     {activeTool.description}
                                 </p>
                             </div>
@@ -67,7 +112,7 @@ export default function ToolPage() {
                     </div>
 
                     {/* Contenido de la herramienta */}
-                    <div className="bg-white/40 dark:bg-gray-800/40 backdrop-blur-xl p-8 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 transition-all duration-300">
+                    <div className="bg-white/40 dark:bg-gray-800/40 backdrop-blur-xl p-6 md:p-8 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 transition-all duration-300">
                         <ActiveToolComponent />
                     </div>
 
@@ -75,7 +120,7 @@ export default function ToolPage() {
                     <div className="mt-8 p-6 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 backdrop-blur-sm border border-blue-200 dark:border-blue-800">
                         <div className="flex items-start gap-3">
                             <span className="text-2xl">💡</span>
-                            <div>
+                            <div className="flex-1">
                                 <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-1">
                                     Tip: Atajo de teclado
                                 </h3>
