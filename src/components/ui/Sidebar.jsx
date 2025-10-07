@@ -1,7 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 
-export default function Sidebar({ navItems, activeToolId, basePath, isOpen, onClose }) {
+export default function Sidebar({ navItems, activeToolId, basePath, isOpen, onClose, onToggle }) {
     return (
         <>
             {/* Overlay para móviles */}
@@ -16,13 +17,63 @@ export default function Sidebar({ navItems, activeToolId, basePath, isOpen, onCl
                 className={`
                     w-72 bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl 
                     border-r border-gray-200 dark:border-gray-700 shadow-xl
-                    fixed top-28 left-0 bottom-0
+                    fixed top-0 left-0 bottom-0
                     z-40 overflow-hidden
                     transition-transform duration-300 ease-in-out
                     ${isOpen ? 'translate-x-0' : '-translate-x-full'}
                 `}
             >
-                <div className="h-full flex flex-col p-6">
+                {/* Botón de toggle integrado en el borde */}
+                <button
+                    onClick={onToggle}
+                    className={`
+                        absolute top-1/2 -translate-y-1/2 -right-4
+                        w-8 h-16 
+                        bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl
+                        border border-gray-200 dark:border-gray-700
+                        rounded-r-xl shadow-lg
+                        flex items-center justify-center
+                        hover:w-10 hover:-right-5
+                        transition-all duration-300 ease-in-out
+                        group z-50
+                        ${!isOpen && 'hidden md:flex'}
+                    `}
+                    aria-label={isOpen ? "Ocultar menú lateral" : "Mostrar menú lateral"}
+                    title={isOpen ? "Ocultar menú (⌘+B)" : "Mostrar menú (⌘+B)"}
+                >
+                    <div className="relative flex items-center justify-center">
+                        <MdChevronLeft 
+                            className={`
+                                text-2xl text-gray-600 dark:text-gray-300
+                                transition-all duration-300
+                                ${isOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-180'}
+                            `}
+                        />
+                        <MdChevronRight 
+                            className={`
+                                text-2xl text-gray-600 dark:text-gray-300
+                                absolute transition-all duration-300
+                                ${!isOpen ? 'opacity-100 rotate-0' : 'opacity-0 rotate-180'}
+                            `}
+                        />
+                    </div>
+                </button>
+
+                {/* Botón flotante para móviles cuando el sidebar está cerrado */}
+                {!isOpen && (
+                    <button
+                        onClick={onToggle}
+                        className="md:hidden fixed top-24 left-4 z-50 p-3 rounded-xl 
+                            bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl 
+                            shadow-lg border border-gray-200 dark:border-gray-700
+                            hover:scale-110 transition-all duration-200"
+                        aria-label="Mostrar menú"
+                    >
+                        <MdChevronRight className="text-2xl text-gray-700 dark:text-gray-300" />
+                    </button>
+                )}
+
+                <div className="h-full flex flex-col pt-28 pb-6 px-6">
                     {/* Header del sidebar */}
                     <div className="mb-6 flex-shrink-0">
                         <h2 className="text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
@@ -100,6 +151,26 @@ export default function Sidebar({ navItems, activeToolId, basePath, isOpen, onCl
                     </div>
                 </div>
             </aside>
+
+            {/* Botón minimalista cuando el sidebar está cerrado (desktop) */}
+            {!isOpen && (
+                <button
+                    onClick={onToggle}
+                    className="hidden md:flex fixed top-1/2 -translate-y-1/2 left-0
+                        w-8 h-16 
+                        bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl
+                        border-r border-t border-b border-gray-200 dark:border-gray-700
+                        rounded-r-xl shadow-lg
+                        items-center justify-center
+                        hover:w-10 hover:left-0
+                        transition-all duration-300 ease-in-out
+                        group z-50"
+                    aria-label="Mostrar menú lateral"
+                    title="Mostrar menú (⌘+B)"
+                >
+                    <MdChevronRight className="text-2xl text-gray-600 dark:text-gray-300 group-hover:scale-110 transition-transform duration-300" />
+                </button>
+            )}
         </>
     );
 }

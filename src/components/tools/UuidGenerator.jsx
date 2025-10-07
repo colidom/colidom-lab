@@ -46,70 +46,88 @@ export default function UuidGenerator() {
     return (
         <div className="flex flex-col gap-6">
             {/* Controles */}
-            <div className="section-container">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label className="label-text">Versión UUID</label>
-                        <select
-                            value={version}
-                            onChange={(e) => setVersion(e.target.value)}
-                            className="input-field"
-                        >
-                            <option value="v4">UUID v4 (Random)</option>
-                            <option value="v1">UUID v1 (Timestamp)</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="label-text">Cantidad (1-100)</label>
-                        <input
-                            type="number"
-                            min="1"
-                            max="100"
-                            value={quantity}
-                            onChange={(e) => setQuantity(Math.min(100, Math.max(1, parseInt(e.target.value) || 1)))}
-                            className="input-field"
-                        />
-                    </div>
+            <div className="flex flex-col md:flex-row gap-4 p-6 rounded-xl bg-white/40 dark:bg-gray-800/40 backdrop-blur-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                <div className="flex-1">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Versión UUID
+                    </label>
+                    <select
+                        value={version}
+                        onChange={(e) => setVersion(e.target.value)}
+                        className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 
+                            bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm
+                            text-gray-900 dark:text-white 
+                            focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200"
+                    >
+                        <option value="v4">UUID v4 (Random)</option>
+                        <option value="v1">UUID v1 (Timestamp)</option>
+                    </select>
                 </div>
 
-                <button
-                    onClick={handleGenerate}
-                    className="btn-primary w-full flex items-center justify-center gap-2"
-                >
-                    <MdRefresh size={20} />
-                    Generar UUID{quantity > 1 ? 's' : ''}
-                </button>
+                <div className="flex-1">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Cantidad (1-100)
+                    </label>
+                    <input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={quantity}
+                        onChange={(e) => setQuantity(Math.min(100, Math.max(1, parseInt(e.target.value) || 1)))}
+                        className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 
+                            bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm
+                            text-gray-900 dark:text-white 
+                            focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200"
+                    />
+                </div>
+
+                <div className="flex items-end">
+                    <button
+                        onClick={handleGenerate}
+                        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 
+                            text-white font-semibold rounded-lg shadow-lg
+                            hover:from-green-600 hover:to-emerald-700 
+                            transform hover:scale-105 transition-all duration-200"
+                    >
+                        <MdRefresh size={20} />
+                        Generar
+                    </button>
+                </div>
             </div>
 
             {/* Resultados */}
             {uuids.length > 0 && (
-                <div className="section-container">
+                <div className="relative p-6 rounded-xl bg-white/40 dark:bg-gray-800/40 backdrop-blur-xl shadow-lg border border-gray-200 dark:border-gray-700">
                     <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        <h3 className="text-lg font-semibold text-green-600 dark:text-green-400">
                             UUIDs Generados ({uuids.length})
                         </h3>
                         <button
                             onClick={handleCopy}
-                            className="btn-secondary flex items-center gap-2"
+                            className="flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 
+                                text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 
+                                transition-colors duration-200"
                         >
                             <MdContentCopy size={16} />
                             {isCopied ? "¡Copiado!" : "Copiar Todos"}
                         </button>
                     </div>
 
-                    <div className="max-h-96 overflow-y-auto space-y-2">
+                    <div className="max-h-96 overflow-y-auto space-y-2 custom-scrollbar">
                         {uuids.map((uuid, index) => (
                             <div
                                 key={index}
-                                className="output-container flex items-center gap-2 group hover:bg-white/70 dark:hover:bg-gray-700/70 transition-colors"
+                                className="flex items-center gap-2 p-3 rounded-lg bg-white/50 dark:bg-gray-700/50 
+                                    hover:bg-white/70 dark:hover:bg-gray-700/70 transition-colors duration-200
+                                    group"
                             >
-                                <span className="flex-1 code-text">
+                                <span className="flex-1 font-mono text-sm text-gray-800 dark:text-gray-200">
                                     {uuid}
                                 </span>
                                 <button
                                     onClick={() => handleCopySingle(uuid)}
-                                    className="btn-icon opacity-0 group-hover:opacity-100"
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-200
+                                        p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                                     title="Copiar"
                                 >
                                     <MdContentCopy size={16} />

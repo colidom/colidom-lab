@@ -50,13 +50,18 @@ export default function HashGenerator() {
     return (
         <div className="flex flex-col gap-6">
             {/* Input */}
-            <div className="section-container">
-                <label className="label-text text-base">Texto a Hashear</label>
+            <div className="p-6 rounded-xl bg-white/40 dark:bg-gray-800/40 backdrop-blur-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                <label className="block text-lg font-semibold text-amber-600 dark:text-amber-400 mb-3">
+                    Texto a Hashear
+                </label>
                 <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Escribe o pega tu texto aquí..."
-                    className="textarea-field h-32"
+                    className="w-full h-32 p-4 rounded-lg border border-gray-300 dark:border-gray-600 
+                        bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm resize-none
+                        text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
+                        focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200"
                 />
                 <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                     Caracteres: {input.length}
@@ -73,7 +78,7 @@ export default function HashGenerator() {
                     {Object.entries(hashes).map(([type, hash]) => (
                         <div
                             key={type}
-                            className={`section-container border-2 ${hashColors[type]}`}
+                            className={`p-5 rounded-xl backdrop-blur-sm shadow-lg border-2 transition-all duration-300 hover:shadow-xl ${hashColors[type]}`}
                         >
                             <div className="flex justify-between items-center mb-3">
                                 <h4 className="text-lg font-bold text-gray-800 dark:text-gray-200">
@@ -81,14 +86,16 @@ export default function HashGenerator() {
                                 </h4>
                                 <button
                                     onClick={() => handleCopy(type, hash)}
-                                    className="btn-secondary flex items-center gap-2"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-lg
+                                        bg-white/50 dark:bg-gray-700/50 hover:bg-white/70 dark:hover:bg-gray-700/70
+                                        text-gray-700 dark:text-gray-300 transition-colors duration-200"
                                 >
                                     <MdContentCopy size={16} />
                                     {copiedHash === type ? "¡Copiado!" : "Copiar"}
                                 </button>
                             </div>
-                            <div className="output-container">
-                                <code className="code-text">
+                            <div className="p-4 rounded-lg bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
+                                <code className="text-sm font-mono text-gray-800 dark:text-gray-200 break-all">
                                     {hash}
                                 </code>
                             </div>

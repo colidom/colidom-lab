@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../components/ui/Sidebar";
 import { allTools } from "../data/allTools";
-import { MdMenu, MdClose } from "react-icons/md";
 
 export default function ToolPage() {
     const { toolId, categoryId } = useParams();
@@ -44,36 +43,17 @@ export default function ToolPage() {
 
     return (
         <div id={categoryId} className="flex flex-col md:flex-row relative min-h-screen">
-            {/* Botón para toggle sidebar */}
-            <button
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className={`
-                    fixed left-4 z-50 p-3 rounded-xl 
-                    bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl 
-                    shadow-lg border border-gray-200 dark:border-gray-700
-                    hover:scale-110 transition-all duration-200 group
-                    ${isSidebarOpen ? 'top-24' : 'top-24'}
-                `}
-                aria-label={isSidebarOpen ? "Ocultar menú" : "Mostrar menú"}
-                title={isSidebarOpen ? "Ocultar menú (⌘+B)" : "Mostrar menú (⌘+B)"}
-            >
-                {isSidebarOpen ? (
-                    <MdClose className="text-2xl text-gray-700 dark:text-gray-300 group-hover:rotate-90 transition-transform duration-200" />
-                ) : (
-                    <MdMenu className="text-2xl text-gray-700 dark:text-gray-300 group-hover:scale-110 transition-transform duration-200" />
-                )}
-            </button>
-
             <Sidebar 
                 navItems={toolsInCategory} 
                 activeToolId={toolId} 
                 basePath={`/${categoryId}`}
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
+                onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
             />
 
             <div className={`
-                flex-1 p-6 md:p-12 pt-32 min-h-screen 
+                flex-1 p-6 md:p-12 pt-36 md:pt-40 min-h-screen 
                 transition-all duration-300 ease-in-out
                 ${isSidebarOpen ? 'md:ml-72' : 'md:ml-0'}
             `}>
