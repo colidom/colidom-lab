@@ -10,7 +10,8 @@ import {
     MdVpnKey,
     MdToken,
     MdSchedule,
-    MdTextFields
+    MdTextFields,
+    MdAccessTime
 } from "react-icons/md";
 
 // Herramientas existentes
@@ -29,6 +30,7 @@ import PasswordGenerator from "../components/tools/PasswordGenerator";
 import JwtDecoder from "../components/tools/JwtDecoder";
 import TimestampConverter from "../components/tools/TimestampConverter";
 import RegexTester from "../components/tools/RegexTester";
+import WorkTimeCalculator from "../components/tools/WorkTimeCalculator";
 
 export const categories = [
     { id: "dev-tools", label: "Dev Tools" },
@@ -211,6 +213,23 @@ export const allTools = [
             icon: "text-green-500",
             title: "text-green-500",
             button: "bg-green-500 hover:bg-green-600",
+        },
+    },
+    {
+        id: "work-time-calculator",
+        category: "utilities",
+        name: "Calculadora de Jornada",
+        shortDescription: "Calcula tu horario laboral y tiempo trabajado.",
+        description: "Calcula automáticamente tu hora de salida según tu jornada laboral, hora de entrada y descansos. Incluye seguimiento en tiempo real del tiempo trabajado y restante.",
+        features: ["Cálculo automático de hora de salida", "Múltiples descansos", "Seguimiento en vivo", "Jornadas personalizables"],
+        icon: MdAccessTime,
+        component: WorkTimeCalculator,
+        colorClasses: {
+            border: "border-blue-500",
+            hoverBorder: "hover:border-blue-500",
+            icon: "text-blue-500",
+            title: "text-blue-500",
+            button: "bg-blue-500 hover:bg-blue-600",
         },
     },
 
