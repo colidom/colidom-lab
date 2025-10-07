@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Header from "./components/ui/Header";
 import Footer from "./components/ui/Footer";
+import FloatingWorkTimer from "./components/FloatingWorkTimer";
 import MainPage from "./pages/MainPage";
 import ToolPage from "./pages/ToolPage";
 import { allTools } from "./data/allTools";
@@ -67,6 +68,9 @@ export default function App() {
                     </Routes>
                 </main>
                 <Footer />
+                
+                {/* Widget Flotante de Seguimiento de Jornada */}
+                <FloatingWorkTimer />
             </div>
         </div>
     );

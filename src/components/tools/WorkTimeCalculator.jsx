@@ -2,13 +2,58 @@ import React, { useState, useEffect } from "react";
 import { MdAccessTime, MdLunchDining, MdCheckCircle, MdPlayArrow, MdStop, MdAdd, MdDelete, MdCalendarToday } from "react-icons/md";
 
 export default function WorkTimeCalculator() {
-    const [workDayType, setWorkDayType] = useState("normal"); // 'normal' (8.5h), 'friday' (6h), 'custom'
+    const [workDayType, setWorkDayType] = useState("normal");
     const [customHours, setCustomHours] = useState(8.5);
     const [startTime, setStartTime] = useState("");
-    const [breaks, setBreaks] = useState([{ duration: 30 }]); // en minutos
+    const [breaks, setBreaks] = useState([{ duration: 30 }]);
     const [endTime, setEndTime] = useState("");
     const [isLiveMode, setIsLiveMode] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
+
+    // Cargar sesión existente al montar
+    useEffect(() => {
+        const savedSession = sessionStorage.getItem('workSession');
+        if (savedSession) {
+            const session = JSON.parse(savedSession);
+            if (session.isActive) {
+                setStartTime(session.startTime);
+                setEndTime(session.endTime);
+                setWorkDayType(session.workDayType);
+                setCustomHours(session.customHours || 8.5);
+                setBreaks(session.breaks || [{ duration: 30 }]);
+                setIsLiveMode(true);
+            }
+        }
+    }, []);
+
+    // Guardar en sessionStorage cuando cambia el estado
+    useEffect(() => {
+        if (isLiveMode && startTime && endTime) {
+            const totalBreakMinutes = breaks.reduce((sum, b) => sum + (b.duration || 0), 0);
+            const targetHours = workDayType === "normal" ? 8.5 : 
+                              workDayType === "friday" ? 6 : 
+                              workDayType === "summer" ? 7 : 
+                              customHours;
+            
+            const workSession = {
+                isActive: true,
+                startTime,
+                endTime,
+                workDayType,
+                customHours,
+                breaks,
+                totalBreakMinutes,
+                targetHours
+            };
+            
+            sessionStorage.setItem('workSession', JSON.stringify(workSession));
+            // Disparar evento para notificar al widget
+            window.dispatchEvent(new Event('workSessionUpdate'));
+        } else if (!isLiveMode) {
+            sessionStorage.removeItem('workSession');
+            window.dispatchEvent(new Event('workSessionUpdate'));
+        }
+    }, [isLiveMode, startTime, endTime, breaks, workDayType, customHours]);
 
     // Actualizar tiempo actual cada segundo en modo live
     useEffect(() => {
@@ -27,14 +72,16 @@ export default function WorkTimeCalculator() {
             return;
         }
 
-        const targetHours = workDayType === "normal" ? 8.5 : workDayType === "friday" ? 6 : customHours;
+        const targetHours = workDayType === "normal" ? 8.5 : 
+                          workDayType === "friday" ? 6 : 
+                          workDayType === "summer" ? 7 : 
+                          customHours;
         const totalBreakMinutes = breaks.reduce((sum, b) => sum + (b.duration || 0), 0);
         
         const [hours, minutes] = startTime.split(":").map(Number);
         const startDate = new Date();
         startDate.setHours(hours, minutes, 0, 0);
 
-        // Añadir horas de trabajo + descansos
         const totalMinutes = (targetHours * 60) + totalBreakMinutes;
         const endDate = new Date(startDate.getTime() + totalMinutes * 60000);
 
@@ -64,12 +111,20 @@ export default function WorkTimeCalculator() {
             alert("Por favor, introduce primero tu hora de entrada");
             return;
         }
+        
+        // Solicitar permisos de notificación
+        if ("Notification" in window && Notification.permission === "default") {
+            Notification.requestPermission();
+        }
+        
         setIsLiveMode(true);
-        setCurrentTime(new Date()); // Actualizar el tiempo actual al iniciar
+        setCurrentTime(new Date());
     };
 
     const stopLiveTracking = () => {
         setIsLiveMode(false);
+        sessionStorage.removeItem('workSession');
+        window.dispatchEvent(new Event('workSessionUpdate'));
     };
 
     const setCurrentTimeAsStart = () => {
@@ -89,13 +144,10 @@ export default function WorkTimeCalculator() {
         const nowMinutes = nowH * 60 + nowM;
 
         let workedMinutes = nowMinutes - startMinutes;
-        
-        // Si es negativo, significa que pasó a otro día
         if (workedMinutes < 0) {
             workedMinutes += 24 * 60;
         }
 
-        // Restar los descansos del tiempo trabajado
         const totalBreakMinutes = breaks.reduce((sum, b) => sum + (b.duration || 0), 0);
         const effectiveWorkedMinutes = Math.max(0, workedMinutes - totalBreakMinutes);
 
@@ -116,9 +168,7 @@ export default function WorkTimeCalculator() {
 
         let remaining = endMinutes - nowMinutes;
         
-        // Si ya pasó la hora de salida
         if (remaining < 0) {
-            // Calcular las horas extras (en positivo)
             const overtime = Math.abs(remaining);
             return {
                 hours: Math.floor(overtime / 60),
@@ -153,7 +203,10 @@ export default function WorkTimeCalculator() {
     };
 
     const totalBreakTime = breaks.reduce((sum, b) => sum + (b.duration || 0), 0);
-    const targetHours = workDayType === "normal" ? 8.5 : workDayType === "friday" ? 6 : customHours;
+    const targetHours = workDayType === "normal" ? 8.5 : 
+                       workDayType === "friday" ? 6 : 
+                       workDayType === "summer" ? 7 : 
+                       customHours;
     const timeWorked = isLiveMode ? calculateTimeWorked() : null;
     const timeRemaining = isLiveMode && startTime ? calculateTimeRemaining() : null;
     const progress = isLiveMode ? calculateProgressPercentage() : 0;
@@ -161,11 +214,24 @@ export default function WorkTimeCalculator() {
     const workDayTypes = [
         { id: "normal", name: "Lunes - Jueves", hours: 8.5, icon: "📅", desc: "Jornada estándar" },
         { id: "friday", name: "Viernes", hours: 6, icon: "🎉", desc: "Jornada reducida" },
+        { id: "summer", name: "Verano", hours: 7, icon: "☀️", desc: "Jornada intensiva" },
         { id: "custom", name: "Personalizado", hours: customHours, icon: "⚙️", desc: "Horas personalizadas" },
     ];
 
     return (
         <div className="space-y-6">
+            {/* Alerta de seguimiento activo */}
+            {isLiveMode && (
+                <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-2xl shadow-lg flex items-center gap-3 animate-slide-in">
+                    <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                    <div className="flex-1">
+                        <div className="font-bold">Seguimiento Activo</div>
+                        <div className="text-sm text-white/90">El widget flotante estará visible en todas las secciones</div>
+                    </div>
+                    <MdCheckCircle className="text-3xl" />
+                </div>
+            )}
+
             {/* Sección: Tipo de Jornada */}
             <div className="bg-gradient-to-br from-white/50 to-white/30 dark:from-gray-800/50 dark:to-gray-800/30 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                 <div className="flex items-center gap-3 mb-6">
@@ -176,7 +242,7 @@ export default function WorkTimeCalculator() {
                     </h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {workDayTypes.map((type) => (
                         <button
                             key={type.id}
@@ -236,6 +302,24 @@ export default function WorkTimeCalculator() {
                         </div>
                     </div>
                 )}
+
+                {/* Info sobre jornada de verano */}
+                {workDayType === "summer" && (
+                    <div className="mt-6 p-5 rounded-xl bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30">
+                        <div className="flex items-start gap-3">
+                            <span className="text-2xl">☀️</span>
+                            <div>
+                                <h4 className="font-semibold text-amber-800 dark:text-amber-300 mb-2">
+                                    Jornada Intensiva de Verano
+                                </h4>
+                                <p className="text-sm text-amber-700 dark:text-amber-400">
+                                    Durante el verano (típicamente junio-septiembre), se trabajan 7 horas sin pausa para almorzar, 
+                                    permitiendo salir antes y disfrutar más del buen tiempo. 🌴
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Sección: Horario */}
@@ -249,7 +333,6 @@ export default function WorkTimeCalculator() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Hora de Entrada */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Hora de Entrada
@@ -274,7 +357,6 @@ export default function WorkTimeCalculator() {
                         </div>
                     </div>
 
-                    {/* Hora de Salida */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Hora de Salida (Calculada)
@@ -287,7 +369,6 @@ export default function WorkTimeCalculator() {
                     </div>
                 </div>
 
-                {/* Botón Tracking en Vivo */}
                 <div className="mt-6">
                     {!isLiveMode ? (
                         <button
@@ -416,7 +497,6 @@ export default function WorkTimeCalculator() {
                         </div>
                     </div>
 
-                    {/* Seguimiento en Vivo */}
                     {isLiveMode && timeWorked && (
                         <div className="mt-6 p-6 rounded-xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 border-2 border-green-300 dark:border-green-700">
                             <div className="flex items-center justify-between mb-4">
@@ -429,7 +509,6 @@ export default function WorkTimeCalculator() {
                                 </span>
                             </div>
                             
-                            {/* Barra de Progreso */}
                             <div className="mb-4">
                                 <div className="flex justify-between text-sm text-green-700 dark:text-green-400 mb-2">
                                     <span>Progreso de jornada</span>
@@ -489,7 +568,7 @@ export default function WorkTimeCalculator() {
                         </h3>
                         <div className="space-y-2 text-sm text-blue-700 dark:text-blue-400">
                             <p>
-                                <strong>1.</strong> Selecciona el tipo de jornada (normal 8.5h, viernes 6h o personalizado)
+                                <strong>1.</strong> Selecciona el tipo de jornada (normal 8.5h, viernes 6h, verano 7h o personalizado)
                             </p>
                             <p>
                                 <strong>2.</strong> Introduce tu hora de entrada (o usa "Usar hora actual" si acabas de entrar)
@@ -501,10 +580,10 @@ export default function WorkTimeCalculator() {
                                 <strong>4.</strong> La herramienta calculará automáticamente tu hora de salida
                             </p>
                             <p>
-                                <strong>5.</strong> Usa el seguimiento en vivo para ver el tiempo trabajado en tiempo real y cuánto te queda
+                                <strong>5.</strong> Usa el seguimiento en vivo y el widget flotante te acompañará en toda la app
                             </p>
                             <p className="pt-2 border-t border-blue-200 dark:border-blue-800">
-                                <strong>💡 Tip:</strong> Los descansos ya están descontados del cálculo. El "tiempo trabajado efectivo" muestra el tiempo real de trabajo sin incluir descansos.
+                                <strong>💡 Tip:</strong> El widget flotante permanece visible mientras navegas por otras herramientas y te notificará cuando termine tu jornada y cada 30 minutos de overtime.
                             </p>
                         </div>
                     </div>
