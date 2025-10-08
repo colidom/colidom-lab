@@ -94,6 +94,25 @@ export default function WorkTimeCalculator() {
         }
     }, []);
 
+    // Escuchar evento de reset completo desde el widget
+    useEffect(() => {
+        const handleReset = () => {
+            // Resetear todos los campos a sus valores por defecto
+            setStartTime("");
+            setEndTime("");
+            setWorkDayType("normal");
+            setCustomHours(8.5);
+            setBreaks([{ duration: 30 }]);
+            setIsLiveMode(false);
+        };
+
+        window.addEventListener('workSessionReset', handleReset);
+        
+        return () => {
+            window.removeEventListener('workSessionReset', handleReset);
+        };
+    }, []);
+
     // Escuchar cambios en la sesión de trabajo (cuando el widget detiene el seguimiento)
     useEffect(() => {
         const handleSessionUpdate = () => {
@@ -201,6 +220,9 @@ export default function WorkTimeCalculator() {
             return;
         }
         
+        // Limpiar sessionStorage antes de empezar nuevo seguimiento
+        sessionStorage.clear();
+        
         // Solicitar permisos de notificación
         if ("Notification" in window && Notification.permission === "default") {
             Notification.requestPermission();
@@ -217,6 +239,7 @@ export default function WorkTimeCalculator() {
             () => {
                 setIsLiveMode(false);
                 sessionStorage.removeItem('workSession');
+                sessionStorage.clear(); // Limpiar completamente
                 window.dispatchEvent(new Event('workSessionUpdate'));
             }
         );

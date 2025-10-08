@@ -14,7 +14,11 @@ export default function FloatingWorkTimer() {
         return saved !== null ? JSON.parse(saved) : true; // Por defecto activadas
     });
     const navigate = useNavigate();
+    const location = window.location;
     const widgetRef = useRef(null);
+
+    // Verificar si estamos en la página de la calculadora
+    const isOnCalculatorPage = location.pathname === '/utilities/work-time-calculator';
 
     // Estado para el modal de confirmación
     const [confirmModal, setConfirmModal] = useState({
@@ -38,7 +42,22 @@ export default function FloatingWorkTimer() {
         const loadWorkSession = () => {
             const session = sessionStorage.getItem('workSession');
             if (session) {
-                setWorkSession(JSON.parse(session));
+                try {
+                    const parsedSession = JSON.parse(session);
+                    
+                    // Validar que la sesión tenga todos los datos necesarios
+                    if (parsedSession.isActive && parsedSession.startTime && parsedSession.endTime) {
+                        setWorkSession(parsedSession);
+                    } else {
+                        // Si la sesión está corrupta, limpiarla
+                        sessionStorage.removeItem('workSession');
+                        setWorkSession(null);
+                    }
+                } catch (error) {
+                    // Si hay error al parsear, limpiar
+                    sessionStorage.removeItem('workSession');
+                    setWorkSession(null);
+                }
             } else {
                 // Si no hay sesión, limpiar el estado
                 setWorkSession(null);
@@ -114,11 +133,24 @@ export default function FloatingWorkTimer() {
 
         const [endH, endM] = workSession.endTime.split(":").map(Number);
         const [nowH, nowM] = [currentTime.getHours(), currentTime.getMinutes()];
+        const [startH, startM] = workSession.startTime.split(":").map(Number);
 
-        const endMinutes = endH * 60 + endM;
+        let endMinutes = endH * 60 + endM;
         const nowMinutes = nowH * 60 + nowM;
+        const startMinutes = startH * 60 + startM;
 
-        let remaining = endMinutes - nowMinutes;
+        // Si la hora de fin es menor que la hora de inicio, significa que cruzamos medianoche
+        if (endMinutes < startMinutes) {
+            endMinutes += 1440; // Sumar 24 horas (1440 minutos)
+        }
+
+        // Si estamos antes de la hora de inicio del mismo día, significa que ya es el día siguiente
+        let adjustedNowMinutes = nowMinutes;
+        if (nowMinutes < startMinutes && endMinutes > 1440) {
+            adjustedNowMinutes += 1440; // Estamos en el día siguiente
+        }
+
+        let remaining = endMinutes - adjustedNowMinutes;
 
         if (remaining < 0) {
             const overtime = Math.abs(remaining);
@@ -169,12 +201,18 @@ export default function FloatingWorkTimer() {
         const [nowH, nowM] = [currentTime.getHours(), currentTime.getMinutes()];
 
         const startMinutes = startH * 60 + startM;
-        const nowMinutes = nowH * 60 + nowM;
+        let nowMinutes = nowH * 60 + nowM;
+
+        // Si la hora actual es menor que la hora de inicio, significa que cruzamos medianoche
+        // Ejemplo: inicio ayer 23:30, ahora son las 02:00 de hoy
+        if (nowMinutes < startMinutes) {
+            nowMinutes += 1440; // Sumar 24 horas
+        }
 
         let workedMinutes = nowMinutes - startMinutes;
-        if (workedMinutes < 0) workedMinutes += 24 * 60;
 
-        const effectiveWorkedMinutes = Math.max(0, workedMinutes - workSession.totalBreakMinutes);
+        const totalBreakMinutes = workSession.totalBreakMinutes || 0;
+        const effectiveWorkedMinutes = Math.max(0, workedMinutes - totalBreakMinutes);
 
         return {
             hours: Math.floor(effectiveWorkedMinutes / 60),
@@ -240,7 +278,10 @@ export default function FloatingWorkTimer() {
             "¿Detener seguimiento?",
             "Se detendrá el seguimiento de tu jornada laboral y se perderán los datos actuales.",
             () => {
+                // Limpiar sessionStorage
                 sessionStorage.removeItem('workSession');
+                sessionStorage.clear(); // Asegurar limpieza completa
+                
                 setLastOvertimeAlert(0);
                 setWorkSession(null);
                 
@@ -257,9 +298,16 @@ export default function FloatingWorkTimer() {
             "¿Resetear contador?",
             "Esto detendrá el seguimiento y eliminará todos los datos de la sesión actual.",
             () => {
+                // Limpiar TODO del sessionStorage
                 sessionStorage.removeItem('workSession');
+                sessionStorage.clear(); // Asegurar limpieza completa
+                
+                // Resetear estados locales
                 setLastOvertimeAlert(0);
                 setWorkSession(null);
+                
+                // Disparar evento para resetear la calculadora completamente
+                window.dispatchEvent(new Event('workSessionReset'));
                 
                 // Disparar evento después de un pequeño delay
                 setTimeout(() => {
@@ -274,11 +322,13 @@ export default function FloatingWorkTimer() {
         navigate('/utilities/work-time-calculator');
     };
 
-    // No mostrar si no hay sesión activa
-    if (!workSession?.isActive) return null;
+    // Mostrar el widget si:
+    // 1. Estamos en la página de la calculadora (siempre)
+    // 2. O hay una sesión activa (en cualquier página)
+    if (!isOnCalculatorPage && !workSession?.isActive) return null;
 
-    const timeRemaining = calculateTimeRemaining();
-    const timeWorked = calculateTimeWorked();
+    const timeRemaining = workSession ? calculateTimeRemaining() : { hours: 0, minutes: 0, isOvertime: false };
+    const timeWorked = workSession ? calculateTimeWorked() : { hours: 0, minutes: 0 };
 
     if (isMinimized) {
         return (
@@ -311,23 +361,38 @@ export default function FloatingWorkTimer() {
             />
 
             <div className={`w-80 rounded-2xl shadow-2xl backdrop-blur-xl border-2 overflow-hidden
-                ${timeRemaining.isOvertime 
-                    ? 'bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/40 dark:to-orange-900/40 border-red-400 dark:border-red-600' 
-                    : 'bg-gradient-to-br from-white/95 to-white/90 dark:from-gray-800/95 dark:to-gray-800/90 border-blue-300 dark:border-blue-700'
+                ${
+                    !workSession?.isActive
+                        ? 'bg-gradient-to-br from-gray-100 to-gray-50 dark:from-gray-800/60 dark:to-gray-900/60 border-gray-300 dark:border-gray-600'
+                        : timeRemaining.isOvertime 
+                            ? 'bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/40 dark:to-orange-900/40 border-red-400 dark:border-red-600' 
+                            : 'bg-gradient-to-br from-white/95 to-white/90 dark:from-gray-800/95 dark:to-gray-800/90 border-blue-300 dark:border-blue-700'
                 }`}
             >
                 {/* Header */}
                 <div className={`px-4 py-3 flex items-center justify-between
-                    ${timeRemaining.isOvertime 
-                        ? 'bg-gradient-to-r from-red-500 to-orange-500' 
-                        : 'bg-gradient-to-r from-blue-500 to-cyan-500'
+                    ${
+                        !workSession?.isActive
+                            ? 'bg-gradient-to-r from-gray-500 to-gray-600'
+                            : timeRemaining.isOvertime 
+                                ? 'bg-gradient-to-r from-red-500 to-orange-500' 
+                                : 'bg-gradient-to-r from-blue-500 to-cyan-500'
                     }`}
                 >
                     <div className="flex items-center gap-2 text-white">
-                        <div className={`w-2 h-2 rounded-full animate-pulse ${
-                            timeRemaining.isOvertime ? 'bg-yellow-300' : 'bg-green-400'
-                        }`}></div>
-                        <span className="font-bold text-sm">Jornada Activa</span>
+                        {workSession?.isActive ? (
+                            <>
+                                <div className={`w-2 h-2 rounded-full animate-pulse ${
+                                    timeRemaining.isOvertime ? 'bg-yellow-300' : 'bg-green-400'
+                                }`}></div>
+                                <span className="font-bold text-sm">Jornada Activa</span>
+                            </>
+                        ) : (
+                            <>
+                                <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                                <span className="font-bold text-sm">Sin Seguimiento</span>
+                            </>
+                        )}
                     </div>
                     <div className="flex items-center gap-2">
                         <button
@@ -367,7 +432,9 @@ export default function FloatingWorkTimer() {
 
                 {/* Body */}
                 <div className="p-4 space-y-3">
-                    {/* Tiempo Restante/Overtime */}
+                    {workSession?.isActive ? (
+                        <>
+                            {/* Tiempo Restante/Overtime */}
                     <div className={`p-4 rounded-xl ${
                         timeRemaining.isOvertime 
                             ? 'bg-red-500 text-white' 
@@ -432,12 +499,25 @@ export default function FloatingWorkTimer() {
 
                     {/* Botón Ver Detalle */}
                     <button
-                        onClick={goToCalculator}
-                        className="w-full py-2 rounded-lg font-medium text-sm transition-all duration-300
-                            bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg"
+                    onClick={goToCalculator}
+                    className="w-full py-2 rounded-lg font-medium text-sm transition-all duration-300
+                    bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg"
                     >
-                        Ver Detalle Completo
+                    Ver Detalle Completo
                     </button>
+                            </>
+                    ) : (
+                        // Widget cuando NO hay seguimiento activo
+                        <div className="text-center py-8">
+                            <div className="text-6xl mb-4">⏱️</div>
+                            <h3 className="text-lg font-bold text-gray-700 dark:text-gray-300 mb-2">
+                                Sin Seguimiento Activo
+                            </h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Inicia el seguimiento de tu jornada laboral desde arriba
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
