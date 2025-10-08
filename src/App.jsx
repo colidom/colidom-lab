@@ -4,6 +4,7 @@ import Header from "./components/ui/Header";
 import Footer from "./components/ui/Footer";
 import FloatingWorkTimer from "./components/FloatingWorkTimer";
 import SearchModal from "./components/ui/SearchModal";
+import ScrollToTop from "./components/ScrollToTop";
 import MainPage from "./pages/MainPage";
 import ToolPage from "./pages/ToolPage";
 import { allTools } from "./data/allTools";
@@ -40,6 +41,9 @@ export default function App() {
 
             {/* Modal de búsqueda */}
             <SearchModal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} />
+
+            {/* Scroll suave al top cuando cambia la página */}
+            <ScrollToTop />
 
             {/* Contenido principal */}
             <div className="relative z-10 flex flex-col min-h-screen">
