@@ -94,6 +94,27 @@ export default function WorkTimeCalculator() {
         }
     }, []);
 
+    // Escuchar cambios en la sesión de trabajo (cuando el widget detiene el seguimiento)
+    useEffect(() => {
+        const handleSessionUpdate = () => {
+            const savedSession = sessionStorage.getItem('workSession');
+            
+            if (!savedSession) {
+                // Si no hay sesión y el modo live está activo, desactivarlo
+                if (isLiveMode) {
+                    setIsLiveMode(false);
+                }
+            }
+        };
+
+        // Escuchar el evento personalizado
+        window.addEventListener('workSessionUpdate', handleSessionUpdate);
+        
+        return () => {
+            window.removeEventListener('workSessionUpdate', handleSessionUpdate);
+        };
+    }, [isLiveMode]); // Solo depende de isLiveMode
+
     // Guardar en sessionStorage cuando cambia el estado
     useEffect(() => {
         if (isLiveMode && startTime && endTime) {

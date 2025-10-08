@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { MdAccessTime, MdClose, MdWarning, MdCheckCircle, MdRefresh } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import ConfirmModal from "./ui/ConfirmModal";
 
 export default function FloatingWorkTimer() {
     const [workSession, setWorkSession] = useState(null);
@@ -10,12 +11,32 @@ export default function FloatingWorkTimer() {
     const navigate = useNavigate();
     const widgetRef = useRef(null);
 
+    // Estado para el modal de confirmación
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: "",
+        message: "",
+        onConfirm: null
+    });
+
+    // Funciones para manejar el modal
+    const showConfirm = (title, message, onConfirm) => {
+        setConfirmModal({ isOpen: true, title, message, onConfirm });
+    };
+
+    const closeConfirm = () => {
+        setConfirmModal({ isOpen: false, title: "", message: "", onConfirm: null });
+    };
+
     // Cargar sesión de trabajo desde sessionStorage
     useEffect(() => {
         const loadWorkSession = () => {
             const session = sessionStorage.getItem('workSession');
             if (session) {
                 setWorkSession(JSON.parse(session));
+            } else {
+                // Si no hay sesión, limpiar el estado
+                setWorkSession(null);
             }
         };
 
@@ -36,6 +57,13 @@ export default function FloatingWorkTimer() {
         };
     }, []);
 
+    // Cerrar modal cuando se minimiza el widget
+    useEffect(() => {
+        if (isMinimized && confirmModal.isOpen) {
+            closeConfirm();
+        }
+    }, [isMinimized, confirmModal.isOpen]);
+
     // Solicitar permisos de notificación al montar
     useEffect(() => {
         if (workSession?.isActive) {
@@ -46,6 +74,9 @@ export default function FloatingWorkTimer() {
     // Detectar clics fuera del widget para minimizarlo
     useEffect(() => {
         const handleClickOutside = (event) => {
+            // No minimizar si hay un modal abierto
+            if (confirmModal.isOpen) return;
+            
             // Solo minimizar si no está ya minimizado y el clic fue fuera del widget
             if (!isMinimized && widgetRef.current && !widgetRef.current.contains(event.target)) {
                 setIsMinimized(true);
@@ -60,7 +91,7 @@ export default function FloatingWorkTimer() {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [isMinimized, workSession?.isActive]);
+    }, [isMinimized, workSession?.isActive, confirmModal.isOpen]);
 
     // Actualizar tiempo cada segundo
     useEffect(() => {
@@ -174,24 +205,38 @@ export default function FloatingWorkTimer() {
     };
 
     const stopTracking = () => {
-        if (window.confirm('¿Detener el seguimiento de jornada?')) {
-            sessionStorage.removeItem('workSession');
-            setWorkSession(null);
-            setLastOvertimeAlert(0);
-            window.dispatchEvent(new Event('workSessionUpdate'));
-        }
+        showConfirm(
+            "¿Detener seguimiento?",
+            "Se detendrá el seguimiento de tu jornada laboral y se perderán los datos actuales.",
+            () => {
+                sessionStorage.removeItem('workSession');
+                setLastOvertimeAlert(0);
+                setWorkSession(null);
+                
+                // Disparar evento después de un pequeño delay para asegurar que React actualice el estado
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('workSessionUpdate'));
+                }, 10);
+            }
+        );
     };
 
     const resetTracking = () => {
-        if (window.confirm('¿Resetear el contador y detener el seguimiento?')) {
-            sessionStorage.removeItem('workSession');
-            setWorkSession(null);
-            setLastOvertimeAlert(0);
-            window.dispatchEvent(new Event('workSessionUpdate'));
-            
-            // Notificación de confirmación
-            showNotification("✅ Contador Reseteado", "El seguimiento de jornada ha sido detenido y reseteado.");
-        }
+        showConfirm(
+            "¿Resetear contador?",
+            "Esto detendrá el seguimiento y eliminará todos los datos de la sesión actual.",
+            () => {
+                sessionStorage.removeItem('workSession');
+                setLastOvertimeAlert(0);
+                setWorkSession(null);
+                
+                // Disparar evento después de un pequeño delay
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('workSessionUpdate'));
+                    showNotification("✅ Contador Reseteado", "El seguimiento de jornada ha sido detenido y reseteado.");
+                }, 10);
+            }
+        );
     };
 
     const goToCalculator = () => {
@@ -225,6 +270,15 @@ export default function FloatingWorkTimer() {
 
     return (
         <div ref={widgetRef} className="fixed bottom-4 right-4 z-50 animate-slide-in">
+            {/* Modal de confirmación */}
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={closeConfirm}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+            />
+
             <div className={`w-80 rounded-2xl shadow-2xl backdrop-blur-xl border-2 overflow-hidden
                 ${timeRemaining.isOvertime 
                     ? 'bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/40 dark:to-orange-900/40 border-red-400 dark:border-red-600' 
@@ -239,7 +293,9 @@ export default function FloatingWorkTimer() {
                     }`}
                 >
                     <div className="flex items-center gap-2 text-white">
-                        <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                        <div className={`w-2 h-2 rounded-full animate-pulse ${
+                            timeRemaining.isOvertime ? 'bg-yellow-300' : 'bg-green-400'
+                        }`}></div>
                         <span className="font-bold text-sm">Jornada Activa</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -286,7 +342,7 @@ export default function FloatingWorkTimer() {
                                     ? 'text-white' 
                                     : 'text-gray-600 dark:text-gray-400'
                             }`}>
-                                {timeRemaining.isOvertime ? '⚠️ Horas Extra' : 'Tiempo Restante'}
+                                {timeRemaining.isOvertime ? 'Horas Extra' : 'Tiempo Restante'}
                             </span>
                         </div>
                         <div className={`text-3xl font-bold ${
