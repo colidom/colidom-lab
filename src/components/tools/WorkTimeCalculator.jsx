@@ -211,9 +211,15 @@ export default function WorkTimeCalculator() {
     };
 
     const stopLiveTracking = () => {
-        setIsLiveMode(false);
-        sessionStorage.removeItem('workSession');
-        window.dispatchEvent(new Event('workSessionUpdate'));
+        showConfirm(
+            "¿Detener seguimiento?",
+            "Se detendrá el seguimiento de tu jornada laboral y se perderán los datos actuales.",
+            () => {
+                setIsLiveMode(false);
+                sessionStorage.removeItem('workSession');
+                window.dispatchEvent(new Event('workSessionUpdate'));
+            }
+        );
     };
 
     const setCurrentTimeAsStart = () => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { MdAccessTime, MdClose, MdWarning, MdRefresh } from "react-icons/md";
+import { MdAccessTime, MdClose, MdWarning, MdRefresh, MdNotifications, MdNotificationsOff } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import ConfirmModal from "./ui/ConfirmModal";
 
@@ -8,6 +8,11 @@ export default function FloatingWorkTimer() {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [isMinimized, setIsMinimized] = useState(false);
     const [lastOvertimeAlert, setLastOvertimeAlert] = useState(0);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
+        // Cargar preferencia de notificaciones desde localStorage
+        const saved = localStorage.getItem('workTimerNotifications');
+        return saved !== null ? JSON.parse(saved) : true; // Por defecto activadas
+    });
     const navigate = useNavigate();
     const widgetRef = useRef(null);
 
@@ -178,6 +183,9 @@ export default function FloatingWorkTimer() {
     };
 
     const showNotification = (title, body) => {
+        // Solo mostrar si las notificaciones están activadas
+        if (!notificationsEnabled) return;
+
         // Notificación del navegador
         if ("Notification" in window && Notification.permission === "granted") {
             new Notification(title, { body, icon: "/favicon.ico" });
@@ -197,6 +205,28 @@ export default function FloatingWorkTimer() {
             notification.style.transition = 'opacity 0.3s';
             setTimeout(() => notification.remove(), 300);
         }, 5000);
+    };
+
+    const toggleNotifications = () => {
+        const newValue = !notificationsEnabled;
+        setNotificationsEnabled(newValue);
+        // Guardar preferencia en localStorage
+        localStorage.setItem('workTimerNotifications', JSON.stringify(newValue));
+        
+        // Mostrar feedback visual
+        const message = newValue ? "✅ Notificaciones activadas" : "🔕 Notificaciones desactivadas";
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 ${newValue ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-gray-500 to-gray-600'} text-white px-6 py-4 rounded-xl shadow-2xl z-[9999] animate-slide-in`;
+        notification.innerHTML = `
+            <div class="font-bold text-lg">${message}</div>
+        `;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transition = 'opacity 0.3s';
+            setTimeout(() => notification.remove(), 300);
+        }, 2000);
     };
 
     const requestNotificationPermission = () => {
@@ -300,6 +330,17 @@ export default function FloatingWorkTimer() {
                         <span className="font-bold text-sm">Jornada Activa</span>
                     </div>
                     <div className="flex items-center gap-2">
+                        <button
+                            onClick={toggleNotifications}
+                            className="p-1 hover:bg-white/20 rounded transition-colors"
+                            title={notificationsEnabled ? "Desactivar notificaciones" : "Activar notificaciones"}
+                        >
+                            {notificationsEnabled ? (
+                                <MdNotifications className="text-white text-lg" />
+                            ) : (
+                                <MdNotificationsOff className="text-white text-lg opacity-60" />
+                            )}
+                        </button>
                         <button
                             onClick={resetTracking}
                             className="p-1 hover:bg-white/20 rounded transition-colors group"
