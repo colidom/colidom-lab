@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { MdAccessTime, MdClose, MdWarning, MdCheckCircle, MdRefresh } from "react-icons/md";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { MdAccessTime, MdClose, MdWarning, MdRefresh } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import ConfirmModal from "./ui/ConfirmModal";
 
@@ -103,31 +103,8 @@ export default function FloatingWorkTimer() {
         }
     }, [workSession?.isActive]);
 
-    // Calcular tiempo restante y verificar notificaciones
-    useEffect(() => {
-        if (!workSession?.isActive) return;
-
-        const remaining = calculateTimeRemaining();
-        
-        // Notificación cuando termina la jornada
-        if (remaining.isOvertime && remaining.totalMinutes === 0) {
-            showNotification("⏰ ¡Hora de Salir!", "Tu jornada laboral ha terminado.");
-        }
-
-        // Notificaciones cada 30 minutos de overtime
-        if (remaining.isOvertime && remaining.totalMinutes > 0) {
-            const overtimeIn30MinBlocks = Math.floor(remaining.totalMinutes / 30);
-            if (overtimeIn30MinBlocks > lastOvertimeAlert) {
-                setLastOvertimeAlert(overtimeIn30MinBlocks);
-                showNotification(
-                    "⚠️ Horas Extra", 
-                    `Llevas ${overtimeIn30MinBlocks * 30} minutos de horas extra`
-                );
-            }
-        }
-    }, [currentTime, workSession, lastOvertimeAlert]);
-
-    const calculateTimeRemaining = () => {
+    // Calcular tiempo restante (memoizado)
+    const calculateTimeRemaining = useCallback(() => {
         if (!workSession) return { hours: 0, minutes: 0, isOvertime: false, totalMinutes: 0 };
 
         const [endH, endM] = workSession.endTime.split(":").map(Number);
@@ -154,7 +131,31 @@ export default function FloatingWorkTimer() {
             isOvertime: false,
             totalMinutes: remaining
         };
-    };
+    }, [workSession, currentTime]);
+
+    // Calcular tiempo restante y verificar notificaciones
+    useEffect(() => {
+        if (!workSession?.isActive) return;
+
+        const remaining = calculateTimeRemaining();
+        
+        // Notificación cuando termina la jornada
+        if (remaining.isOvertime && remaining.totalMinutes === 0) {
+            showNotification("⏰ ¡Hora de Salir!", "Tu jornada laboral ha terminado.");
+        }
+
+        // Notificaciones cada 30 minutos de overtime
+        if (remaining.isOvertime && remaining.totalMinutes > 0) {
+            const overtimeIn30MinBlocks = Math.floor(remaining.totalMinutes / 30);
+            if (overtimeIn30MinBlocks > lastOvertimeAlert) {
+                setLastOvertimeAlert(overtimeIn30MinBlocks);
+                showNotification(
+                    "⚠️ Horas Extra", 
+                    `Llevas ${overtimeIn30MinBlocks * 30} minutos de horas extra`
+                );
+            }
+        }
+    }, [currentTime, workSession, lastOvertimeAlert, calculateTimeRemaining]);
 
     const calculateTimeWorked = () => {
         if (!workSession) return { hours: 0, minutes: 0 };
