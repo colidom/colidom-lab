@@ -1,12 +1,30 @@
+import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Header from "./components/ui/Header";
 import Footer from "./components/ui/Footer";
 import FloatingWorkTimer from "./components/FloatingWorkTimer";
+import SearchModal from "./components/ui/SearchModal";
 import MainPage from "./pages/MainPage";
 import ToolPage from "./pages/ToolPage";
 import { allTools } from "./data/allTools";
 
 export default function App() {
+    const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+
+    // Atajo de teclado Ctrl + B para abrir el modal de búsqueda
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Ctrl + B (o Cmd + B en Mac)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+                e.preventDefault();
+                setIsSearchModalOpen(true);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
     return (
         <div className="relative flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 text-gray-900 dark:text-white overflow-hidden">
             {/* Efectos de fondo decorativos */}
@@ -19,6 +37,9 @@ export default function App() {
                 {/* Grid pattern */}
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5Q0EzQUYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItaDJ2LTJoLTJ6bTAtNHYyaDJ2LTJoLTJ6bTAgNHYyaDJ2LTJoLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-40 dark:opacity-20" />
             </div>
+
+            {/* Modal de búsqueda */}
+            <SearchModal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} />
 
             {/* Contenido principal */}
             <div className="relative z-10 flex flex-col min-h-screen">

@@ -105,7 +105,7 @@ export default function ToolPage() {
                                     Tip: Atajo de teclado
                                 </h3>
                                 <p className="text-sm text-blue-700 dark:text-blue-400">
-                                    Usa <kbd className="px-2 py-1 bg-white dark:bg-gray-800 rounded border border-blue-300 dark:border-blue-700 font-mono text-xs">Ctrl/Cmd + K</kbd> para buscar herramientas rápidamente
+                                    Usa <kbd className="px-2 py-1 bg-white dark:bg-gray-800 rounded border border-blue-300 dark:border-blue-700 font-mono text-xs">Ctrl + B</kbd> para buscar herramientas rápidamente
                                 </p>
                             </div>
                         </div>
