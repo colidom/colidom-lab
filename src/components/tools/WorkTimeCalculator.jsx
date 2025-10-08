@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MdAccessTime, MdLunchDining, MdCheckCircle, MdPlayArrow, MdStop, MdAdd, MdDelete, MdCalendarToday } from "react-icons/md";
+import ConfirmModal from "../ui/ConfirmModal";
 
 export default function WorkTimeCalculator() {
     const [workDayType, setWorkDayType] = useState("normal");
@@ -9,6 +10,73 @@ export default function WorkTimeCalculator() {
     const [endTime, setEndTime] = useState("");
     const [isLiveMode, setIsLiveMode] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
+    
+    // Estado para el modal de confirmación
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: "",
+        message: "",
+        onConfirm: null
+    });
+
+    // Función para abrir modal de confirmación
+    const showConfirm = (title, message, onConfirm) => {
+        setConfirmModal({
+            isOpen: true,
+            title,
+            message,
+            onConfirm
+        });
+    };
+
+    // Función para cerrar modal de confirmación
+    const closeConfirm = () => {
+        setConfirmModal({
+            isOpen: false,
+            title: "",
+            message: "",
+            onConfirm: null
+        });
+    };
+
+    // Manejar cambio de tipo de jornada con confirmación
+    const handleWorkDayTypeChange = (newType) => {
+        if (isLiveMode && newType !== workDayType) {
+            showConfirm(
+                "¿Cambiar tipo de jornada?",
+                "Esto recalculará tu hora de salida y puede afectar tu seguimiento actual.",
+                () => setWorkDayType(newType)
+            );
+        } else {
+            setWorkDayType(newType);
+        }
+    };
+
+    // Manejar cambio de hora de entrada con confirmación
+    const handleStartTimeChange = (newTime) => {
+        if (isLiveMode && newTime !== startTime) {
+            showConfirm(
+                "¿Cambiar hora de entrada?",
+                "Esto recalculará toda tu jornada y puede afectar tu seguimiento actual.",
+                () => setStartTime(newTime)
+            );
+        } else {
+            setStartTime(newTime);
+        }
+    };
+
+    // Manejar cambio de horas personalizadas con confirmación
+    const handleCustomHoursChange = (newHours) => {
+        if (isLiveMode && newHours !== customHours) {
+            showConfirm(
+                "¿Cambiar horas de trabajo?",
+                "Esto recalculará tu hora de salida y puede afectar tu seguimiento actual.",
+                () => setCustomHours(newHours)
+            );
+        } else {
+            setCustomHours(newHours);
+        }
+    };
 
     // Cargar sesión existente al montar
     useEffect(() => {
@@ -131,7 +199,17 @@ export default function WorkTimeCalculator() {
         const now = new Date();
         const hours = String(now.getHours()).padStart(2, "0");
         const minutes = String(now.getMinutes()).padStart(2, "0");
-        setStartTime(`${hours}:${minutes}`);
+        const newTime = `${hours}:${minutes}`;
+        
+        if (isLiveMode) {
+            showConfirm(
+                "¿Usar hora actual?",
+                "Esto recalculará toda tu jornada y puede afectar tu seguimiento actual.",
+                () => setStartTime(newTime)
+            );
+        } else {
+            setStartTime(newTime);
+        }
     };
 
     const calculateTimeWorked = () => {
@@ -220,6 +298,15 @@ export default function WorkTimeCalculator() {
 
     return (
         <div className="space-y-6">
+            {/* Modal de confirmación */}
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                onClose={closeConfirm}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+            />
+
             {/* Alerta de seguimiento activo */}
             {isLiveMode && (
                 <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-2xl shadow-lg flex items-center gap-3 animate-slide-in">
@@ -246,7 +333,7 @@ export default function WorkTimeCalculator() {
                     {workDayTypes.map((type) => (
                         <button
                             key={type.id}
-                            onClick={() => setWorkDayType(type.id)}
+                            onClick={() => handleWorkDayTypeChange(type.id)}
                             className={`
                                 group relative px-6 py-5 rounded-xl font-medium transition-all duration-300
                                 flex flex-col items-center gap-3
@@ -287,7 +374,7 @@ export default function WorkTimeCalculator() {
                                 max="12"
                                 step="0.5"
                                 value={customHours}
-                                onChange={(e) => setCustomHours(parseFloat(e.target.value))}
+                                onChange={(e) => handleCustomHoursChange(parseFloat(e.target.value))}
                                 className="flex-1 h-3 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer
                                     [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 
                                     [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-br 
@@ -341,7 +428,7 @@ export default function WorkTimeCalculator() {
                             <input
                                 type="time"
                                 value={startTime}
-                                onChange={(e) => setStartTime(e.target.value)}
+                                onChange={(e) => handleStartTimeChange(e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl text-gray-900 dark:text-white text-lg font-mono
                                     focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all
                                     bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm border border-gray-200 dark:border-gray-700"
