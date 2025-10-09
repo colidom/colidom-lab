@@ -195,7 +195,14 @@ export default function FloatingWorkTimer() {
     }, [currentTime, workSession, lastOvertimeAlert, calculateTimeRemaining]);
 
     const calculateTimeWorked = () => {
-        if (!workSession) return { hours: 0, minutes: 0 };
+        if (!workSession) return { 
+            totalHours: 0, 
+            totalMinutes: 0, 
+            effectiveHours: 0, 
+            effectiveMinutes: 0,
+            breakMinutes: 0,
+            isNegative: false
+        };
 
         const [startH, startM] = workSession.startTime.split(":").map(Number);
         const [nowH, nowM] = [currentTime.getHours(), currentTime.getMinutes()];
@@ -205,12 +212,9 @@ export default function FloatingWorkTimer() {
         const endMinutes = endH * 60 + endM;
         let nowMinutes = nowH * 60 + nowM;
 
-        // Solo sumar 24h si realmente cruzamos medianoche:
-        // La jornada cruza medianoche SI la hora de fin es menor que la de inicio
+        // Solo sumar 24h si realmente cruzamos medianoche
         const crossesMidnight = endMinutes < startMinutes;
         
-        // Si cruzamos medianoche Y la hora actual es menor que la de inicio,
-        // significa que ya estamos en el día siguiente
         if (crossesMidnight && nowMinutes < startMinutes) {
             nowMinutes += 1440; // Sumar 24 horas
         }
@@ -218,17 +222,36 @@ export default function FloatingWorkTimer() {
         let workedMinutes = nowMinutes - startMinutes;
         
         // Si el resultado es negativo, aún no ha llegado la hora de inicio
-        // Esto es normal si configuras una hora futura
         if (workedMinutes < 0) {
-            return { hours: 0, minutes: 0 };
+            return { 
+                totalHours: 0, 
+                totalMinutes: 0, 
+                effectiveHours: 0, 
+                effectiveMinutes: 0,
+                breakMinutes: 0,
+                isNegative: false
+            };
         }
 
+        // Tiempo total transcurrido
+        const totalHours = Math.floor(workedMinutes / 60);
+        const totalMinutes = workedMinutes % 60;
+
+        // Calcular tiempo efectivo (descontando descansos)
         const totalBreakMinutes = workSession.totalBreakMinutes || 0;
-        const effectiveWorkedMinutes = Math.max(0, workedMinutes - totalBreakMinutes);
+        const effectiveWorkedMinutes = workedMinutes - totalBreakMinutes;
+        const isNegative = effectiveWorkedMinutes < 0;
+        
+        const effectiveHours = Math.floor(Math.abs(effectiveWorkedMinutes) / 60);
+        const effectiveMinutes = Math.abs(effectiveWorkedMinutes) % 60;
 
         return {
-            hours: Math.floor(effectiveWorkedMinutes / 60),
-            minutes: effectiveWorkedMinutes % 60
+            totalHours,
+            totalMinutes,
+            effectiveHours,
+            effectiveMinutes,
+            breakMinutes: totalBreakMinutes,
+            isNegative
         };
     };
 
@@ -475,11 +498,41 @@ export default function FloatingWorkTimer() {
                         </div>
                     </div>
 
-                    {/* Tiempo Trabajado */}
-                    <div className="p-3 rounded-xl bg-white/70 dark:bg-gray-900/70">
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Trabajado</div>
-                        <div className="text-lg font-bold text-gray-800 dark:text-gray-200">
-                            {timeWorked.hours}h {timeWorked.minutes}m
+                    {/* Tiempo Transcurrido Total */}
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-800">
+                        <div className="text-xs text-blue-600 dark:text-blue-400 mb-1 font-medium">⏱️ Transcurrido</div>
+                        <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                            {timeWorked.totalHours}h {timeWorked.totalMinutes}m
+                        </div>
+                    </div>
+
+                    {/* Descansos */}
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border border-orange-200 dark:border-orange-800">
+                        <div className="text-xs text-orange-600 dark:text-orange-400 mb-1 font-medium">☕ Descansos</div>
+                        <div className="text-lg font-bold text-orange-600 dark:text-orange-400">
+                            {Math.floor(timeWorked.breakMinutes / 60)}h {timeWorked.breakMinutes % 60}m
+                        </div>
+                    </div>
+
+                    {/* Tiempo Efectivo */}
+                    <div className={`p-3 rounded-xl border ${
+                        timeWorked.isNegative 
+                            ? 'bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border-red-200 dark:border-red-800'
+                            : 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800'
+                    }`}>
+                        <div className={`text-xs mb-1 font-medium ${
+                            timeWorked.isNegative 
+                                ? 'text-red-600 dark:text-red-400'
+                                : 'text-green-600 dark:text-green-400'
+                        }`}>
+                            {timeWorked.isNegative ? '🚨 Debes recuperar' : '✅ Tiempo efectivo'}
+                        </div>
+                        <div className={`text-lg font-bold ${
+                            timeWorked.isNegative 
+                                ? 'text-red-600 dark:text-red-400'
+                                : 'text-green-600 dark:text-green-400'
+                        }`}>
+                            {timeWorked.isNegative && '-'}{timeWorked.effectiveHours}h {timeWorked.effectiveMinutes}m
                         </div>
                     </div>
 
