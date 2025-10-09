@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { MdAccessTime, MdLunchDining, MdCheckCircle, MdPlayArrow, MdStop, MdAdd, MdDelete, MdCalendarToday } from "react-icons/md";
+import { MdAccessTime, MdLunchDining, MdCheckCircle, MdPlayArrow, MdStop, MdAdd, MdDelete, MdCalendarToday, MdHistory, MdCalculate } from "react-icons/md";
 import ConfirmModal from "../ui/ConfirmModal";
 
 export default function WorkTimeCalculator() {
@@ -15,6 +15,9 @@ export default function WorkTimeCalculator() {
     const [showCustomBreakModal, setShowCustomBreakModal] = useState(false);
     const [customBreakName, setCustomBreakName] = useState("");
     const [customBreakDuration, setCustomBreakDuration] = useState(30);
+    
+    // Estado para vista activa (calculadora o historial)
+    const [activeView, setActiveView] = useState('calculator'); // 'calculator' o 'history'
     
     // Estado para el modal de confirmación
     const [confirmModal, setConfirmModal] = useState({
@@ -247,11 +250,72 @@ export default function WorkTimeCalculator() {
         setCurrentTime(new Date());
     };
 
+    // Guardar jornada completada en localStorage
+    const saveCompletedWorkday = () => {
+        if (!startTime || !endTime || !isLiveMode) return;
+
+        const now = new Date();
+        const [startH, startM] = startTime.split(":").map(Number);
+        const [endH, endM] = endTime.split(":").map(Number);
+        
+        const startMinutes = startH * 60 + startM;
+        let endMinutes = endH * 60 + endM;
+        let currentMinutes = now.getHours() * 60 + now.getMinutes();
+        
+        // Ajustar si cruza medianoche
+        if (endMinutes < startMinutes) {
+            endMinutes += 1440;
+        }
+        if (currentMinutes < startMinutes && endMinutes > 1440) {
+            currentMinutes += 1440;
+        }
+        
+        const totalMinutes = currentMinutes - startMinutes;
+        const breakMinutes = breaks.reduce((sum, b) => sum + (b.duration || 0), 0);
+        const effectiveMinutes = totalMinutes - breakMinutes;
+        
+        // Calcular horas objetivo según tipo de jornada
+        const targetHours = workDayType === "normal" ? 8.5 : 
+                          workDayType === "friday" ? 6 : 
+                          workDayType === "summer" ? 7 : 
+                          customHours;
+        const targetMinutes = targetHours * 60;
+        const overtimeMinutes = effectiveMinutes - targetMinutes;
+        
+        const workday = {
+            date: now.toISOString().split('T')[0], // YYYY-MM-DD
+            timestamp: now.getTime(),
+            startTime,
+            endTime,
+            actualEndTime: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
+            totalMinutes,
+            breakMinutes,
+            effectiveMinutes,
+            overtimeMinutes,
+            workDayType,
+            targetHours,
+            breaks: [...breaks]
+        };
+        
+        // Obtener jornadas guardadas
+        const savedWorkdays = JSON.parse(localStorage.getItem('workdays') || '[]');
+        savedWorkdays.push(workday);
+        
+        // Mantener solo últimos 90 días
+        const ninetyDaysAgo = Date.now() - (90 * 24 * 60 * 60 * 1000);
+        const filteredWorkdays = savedWorkdays.filter(w => w.timestamp > ninetyDaysAgo);
+        
+        localStorage.setItem('workdays', JSON.stringify(filteredWorkdays));
+    };
+
     const stopLiveTracking = () => {
         showConfirm(
             "¿Detener seguimiento?",
-            "Se detendrá el seguimiento de tu jornada laboral y se perderán los datos actuales.",
+            "Se guardará tu jornada actual y se detendrá el seguimiento.",
             () => {
+                // Guardar jornada antes de detener
+                saveCompletedWorkday();
+                
                 setIsLiveMode(false);
                 sessionStorage.removeItem('workSession');
                 sessionStorage.clear(); // Limpiar completamente
@@ -327,6 +391,31 @@ export default function WorkTimeCalculator() {
         };
     };
 
+    // Obtener jornadas de la semana actual
+    const getWeekWorkdays = () => {
+        const workdays = JSON.parse(localStorage.getItem('workdays') || '[]');
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Lunes
+        startOfWeek.setHours(0, 0, 0, 0);
+        
+        return workdays.filter(w => {
+            const workdayDate = new Date(w.timestamp);
+            return workdayDate >= startOfWeek;
+        });
+    };
+
+    const weekWorkdays = activeView === 'history' ? getWeekWorkdays() : [];
+    
+    // Calcular estadísticas semanales
+    const weekStats = weekWorkdays.reduce((acc, w) => {
+        acc.totalEffective += w.effectiveMinutes;
+        acc.totalBreaks += w.breakMinutes;
+        acc.totalOvertime += w.overtimeMinutes;
+        acc.days += 1;
+        return acc;
+    }, { totalEffective: 0, totalBreaks: 0, totalOvertime: 0, days: 0 });
+
     const calculateProgressPercentage = () => {
         if (!startTime || !endTime) return 0;
 
@@ -376,6 +465,38 @@ export default function WorkTimeCalculator() {
                 title={confirmModal.title}
                 message={confirmModal.message}
             />
+
+            {/* Pestañas */}
+            <div className="bg-gradient-to-br from-white/50 to-white/30 dark:from-gray-800/50 dark:to-gray-800/30 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setActiveView('calculator')}
+                        className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
+                            activeView === 'calculator'
+                                ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg'
+                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                        }`}
+                    >
+                        <MdCalculate className="text-xl" />
+                        Calculadora
+                    </button>
+                    <button
+                        onClick={() => setActiveView('history')}
+                        className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
+                            activeView === 'history'
+                                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                        }`}
+                    >
+                        <MdHistory className="text-xl" />
+                        Historial
+                    </button>
+                </div>
+            </div>
+
+            {activeView === 'calculator' ? (
+                // Vista de Calculadora
+                <>
 
             {/* Alerta de seguimiento activo */}
             {isLiveMode && (
@@ -873,6 +994,121 @@ export default function WorkTimeCalculator() {
                     </div>
                 </div>
             </div>
+            </>
+            ) : (
+                // Vista de Historial Semanal
+                <>
+                    {/* Resumen Semanal */}
+                    <div className="bg-gradient-to-br from-purple-50/50 to-pink-50/30 dark:from-purple-900/20 dark:to-pink-900/10 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-purple-200/50 dark:border-purple-700/50">
+                        <h2 className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-6 flex items-center gap-3">
+                            <MdHistory className="text-3xl" />
+                            Resumen de Esta Semana
+                        </h2>
+
+                        {weekWorkdays.length > 0 ? (
+                            <>
+                                {/* Estadísticas Generales */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                    <div className="p-4 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-purple-200 dark:border-purple-800">
+                                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">📅 Días trabajados</div>
+                                        <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">{weekStats.days}</div>
+                                    </div>
+                                    <div className="p-4 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-blue-200 dark:border-blue-800">
+                                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">⏱️ Horas trabajadas</div>
+                                        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                                            {Math.floor(weekStats.totalEffective / 60)}h {weekStats.totalEffective % 60}m
+                                        </div>
+                                    </div>
+                                    <div className="p-4 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-orange-200 dark:border-orange-800">
+                                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">☕ Descansos</div>
+                                        <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                                            {Math.floor(weekStats.totalBreaks / 60)}h {weekStats.totalBreaks % 60}m
+                                        </div>
+                                    </div>
+                                    <div className={`p-4 rounded-xl bg-white/70 dark:bg-gray-900/70 border ${
+                                        weekStats.totalOvertime >= 0 
+                                            ? 'border-green-200 dark:border-green-800'
+                                            : 'border-red-200 dark:border-red-800'
+                                    }`}>
+                                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                            {weekStats.totalOvertime >= 0 ? '✅ Horas extra' : '🚨 Debes recuperar'}
+                                        </div>
+                                        <div className={`text-2xl font-bold ${
+                                            weekStats.totalOvertime >= 0 
+                                                ? 'text-green-600 dark:text-green-400'
+                                                : 'text-red-600 dark:text-red-400'
+                                        }`}>
+                                            {weekStats.totalOvertime < 0 && '-'}
+                                            {Math.floor(Math.abs(weekStats.totalOvertime) / 60)}h {Math.abs(weekStats.totalOvertime) % 60}m
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Lista de Jornadas */}
+                                <div className="space-y-3">
+                                    <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-3">Detalle por día:</h3>
+                                    {weekWorkdays.map((workday, index) => {
+                                        const date = new Date(workday.timestamp);
+                                        const dayName = date.toLocaleDateString('es-ES', { weekday: 'long' });
+                                        const dateStr = date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
+                                        
+                                        return (
+                                            <div key={index} className="p-4 rounded-xl bg-white/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <div>
+                                                        <div className="font-bold text-gray-800 dark:text-gray-200 capitalize">
+                                                            {dayName}
+                                                        </div>
+                                                        <div className="text-sm text-gray-500 dark:text-gray-400">{dateStr}</div>
+                                                    </div>
+                                                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                                                        {workday.startTime} - {workday.actualEndTime}
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-3 gap-3 text-sm">
+                                                    <div>
+                                                        <span className="text-gray-500 dark:text-gray-400">Trabajado: </span>
+                                                        <span className="font-semibold text-blue-600 dark:text-blue-400">
+                                                            {Math.floor(workday.effectiveMinutes / 60)}h {workday.effectiveMinutes % 60}m
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-gray-500 dark:text-gray-400">Descansos: </span>
+                                                        <span className="font-semibold text-orange-600 dark:text-orange-400">
+                                                            {Math.floor(workday.breakMinutes / 60)}h {workday.breakMinutes % 60}m
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-gray-500 dark:text-gray-400">Balance: </span>
+                                                        <span className={`font-semibold ${
+                                                            workday.overtimeMinutes >= 0
+                                                                ? 'text-green-600 dark:text-green-400'
+                                                                : 'text-red-600 dark:text-red-400'
+                                                        }`}>
+                                                            {workday.overtimeMinutes < 0 && '-'}
+                                                            {Math.floor(Math.abs(workday.overtimeMinutes) / 60)}h {Math.abs(workday.overtimeMinutes) % 60}m
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </>
+                        ) : (
+                            <div className="text-center py-12">
+                                <div className="text-6xl mb-4">📊</div>
+                                <h3 className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-2">
+                                    Sin jornadas esta semana
+                                </h3>
+                                <p className="text-gray-600 dark:text-gray-400">
+                                    Empieza a registrar tus jornadas para ver estadísticas aquí
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </>
+            )}
         </div>
     );
 }
