@@ -956,7 +956,7 @@ export default function WorkTimeCalculator() {
                                                 ✅ Cuenta como tiempo efectivo de trabajo
                                             </span>
                                             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                                Marca esto para ausencias que cuentan como trabajadas: médico, formación obligatoria, reuniones, etc. Este tiempo NO se descontará de tu jornada.
+                                                Marca esto para ausencias que cuentan como trabajadas (médico, formación, reuniones, etc.). Este tiempo NO se descontará de tu jornada.
                                             </p>
                                         </div>
                                     </label>
