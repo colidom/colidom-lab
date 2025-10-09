@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { MdAccessTime, MdLunchDining, MdCheckCircle, MdPlayArrow, MdStop, MdAdd, MdDelete, MdCalendarToday, MdHistory, MdCalculate } from "react-icons/md";
+import { MdAccessTime, MdLunchDining, MdCheckCircle, MdPlayArrow, MdStop, MdAdd, MdDelete, MdCalendarToday, MdHistory, MdCalculate, MdFileDownload, MdFileUpload, MdSync, MdWarning } from "react-icons/md";
 import ConfirmModal from "../ui/ConfirmModal";
 
 export default function WorkTimeCalculator() {
@@ -18,6 +18,12 @@ export default function WorkTimeCalculator() {
     
     // Estado para vista activa (calculadora o historial)
     const [activeView, setActiveView] = useState('calculator'); // 'calculator' o 'history'
+    
+    // Estado para el último backup
+    const [lastBackup, setLastBackup] = useState(() => {
+        const last = localStorage.getItem('lastBackupDate');
+        return last ? new Date(last) : null;
+    });
     
     // Estado para el modal de confirmación
     const [confirmModal, setConfirmModal] = useState({
@@ -308,6 +314,86 @@ export default function WorkTimeCalculator() {
         localStorage.setItem('workdays', JSON.stringify(filteredWorkdays));
     };
 
+    // Exportar datos a JSON con backup automático
+    const exportData = () => {
+        const workdays = localStorage.getItem('workdays') || '[]';
+        const data = {
+            version: '1.0',
+            exportDate: new Date().toISOString(),
+            totalWorkdays: JSON.parse(workdays).length,
+            workdays: JSON.parse(workdays)
+        };
+        
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `backup-jornadas-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        // Guardar fecha del último backup
+        const now = new Date();
+        localStorage.setItem('lastBackupDate', now.toISOString());
+        setLastBackup(now);
+    };
+
+    // Importar datos desde JSON
+    const importData = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                
+                // Validar formato
+                if (!data.workdays || !Array.isArray(data.workdays)) {
+                    alert('❌ Archivo inválido: formato incorrecto');
+                    return;
+                }
+                
+                // Hacer backup automático antes de importar
+                exportData();
+                
+                // Merge con datos existentes
+                const existing = JSON.parse(localStorage.getItem('workdays') || '[]');
+                const merged = [...existing, ...data.workdays];
+                
+                // Eliminar duplicados (por fecha + hora de entrada)
+                const unique = merged.reduce((acc, curr) => {
+                    const exists = acc.find(w => 
+                        w.date === curr.date && 
+                        w.startTime === curr.startTime
+                    );
+                    if (!exists) {
+                        acc.push(curr);
+                    }
+                    return acc;
+                }, []);
+                
+                // Ordenar por fecha descendente
+                unique.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                localStorage.setItem('workdays', JSON.stringify(unique));
+                alert(`✅ Datos importados exitosamente\n\n📊 Jornadas nuevas: ${data.workdays.length}\n📈 Total en sistema: ${unique.length}`);
+                
+                // Recargar vista si está en historial
+                if (activeView === 'history') {
+                    window.location.reload();
+                }
+            } catch (error) {
+                alert('❌ Error al importar: ' + error.message);
+            }
+        };
+        reader.readAsText(file);
+        // Limpiar input
+        event.target.value = '';
+    };
+
     const stopLiveTracking = () => {
         showConfirm(
             "¿Detener seguimiento?",
@@ -416,6 +502,8 @@ export default function WorkTimeCalculator() {
         return acc;
     }, { totalEffective: 0, totalBreaks: 0, totalOvertime: 0, days: 0 });
 
+
+
     const calculateProgressPercentage = () => {
         if (!startTime || !endTime) return 0;
 
@@ -465,6 +553,60 @@ export default function WorkTimeCalculator() {
                 title={confirmModal.title}
                 message={confirmModal.message}
             />
+
+            {/* Banner de Advertencia sobre localStorage */}
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 backdrop-blur-xl rounded-2xl p-6 shadow-lg border-2 border-amber-300 dark:border-amber-700">
+                <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                        <MdWarning className="text-4xl text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="text-lg font-bold text-amber-800 dark:text-amber-300 mb-2">
+                            ⚠️ Tus datos se guardan localmente en este navegador
+                        </h3>
+                        <p className="text-sm text-amber-700 dark:text-amber-400 mb-2">
+                            Haz backup periódico para no perderlos. Si limpias el caché del navegador, los datos se perderán.
+                        </p>
+                        {lastBackup && (
+                            <p className="text-xs text-amber-600 dark:text-amber-500 mb-4 font-medium">
+                                Último backup: {lastBackup.toLocaleDateString('es-ES', { 
+                                    day: '2-digit', 
+                                    month: 'short', 
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
+                            </p>
+                        )}
+                        {!lastBackup && (
+                            <p className="text-xs text-red-600 dark:text-red-400 mb-4 font-semibold">
+                                ⚠️ Aún no has hecho ningún backup
+                            </p>
+                        )}
+                        <div className="flex flex-wrap gap-3">
+                            <button
+                                onClick={exportData}
+                                className="px-4 py-2 rounded-lg font-medium transition-all duration-300 flex items-center gap-2
+                                    bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg hover:scale-105"
+                            >
+                                <MdFileDownload className="text-xl" />
+                                Exportar Datos (Backup)
+                            </button>
+                            <label className="px-4 py-2 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 cursor-pointer
+                                bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg hover:scale-105">
+                                <MdFileUpload className="text-xl" />
+                                Importar Datos
+                                <input
+                                    type="file"
+                                    accept="application/json"
+                                    onChange={importData}
+                                    className="hidden"
+                                />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             {/* Pestañas */}
             <div className="bg-gradient-to-br from-white/50 to-white/30 dark:from-gray-800/50 dark:to-gray-800/30 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
