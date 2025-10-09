@@ -201,6 +201,7 @@ export default function FloatingWorkTimer() {
             effectiveHours: 0, 
             effectiveMinutes: 0,
             breakMinutes: 0,
+            effectiveBreakMinutes: 0,
             isNegative: false
         };
 
@@ -229,6 +230,7 @@ export default function FloatingWorkTimer() {
                 effectiveHours: 0, 
                 effectiveMinutes: 0,
                 breakMinutes: 0,
+                effectiveBreakMinutes: 0,
                 isNegative: false
             };
         }
@@ -237,8 +239,17 @@ export default function FloatingWorkTimer() {
         const totalHours = Math.floor(workedMinutes / 60);
         const totalMinutes = workedMinutes % 60;
 
-        // Calcular tiempo efectivo (descontando descansos)
-        const totalBreakMinutes = workSession.totalBreakMinutes || 0;
+        // Calcular tiempo efectivo (descontando SOLO descansos no efectivos)
+        // Filtrar solo los descansos que NO son tiempo efectivo
+        const breaks = workSession.breaks || [];
+        const totalBreakMinutes = breaks.reduce((sum, b) => {
+            return sum + (b.isEffectiveTime ? 0 : (b.duration || 0));
+        }, 0);
+        // Calcular descansos efectivos por separado
+        const effectiveBreakMinutes = breaks.reduce((sum, b) => {
+            return sum + (b.isEffectiveTime ? (b.duration || 0) : 0);
+        }, 0);
+        
         const effectiveWorkedMinutes = workedMinutes - totalBreakMinutes;
         const isNegative = effectiveWorkedMinutes < 0;
         
@@ -251,6 +262,7 @@ export default function FloatingWorkTimer() {
             effectiveHours,
             effectiveMinutes,
             breakMinutes: totalBreakMinutes,
+            effectiveBreakMinutes,
             isNegative
         };
     };
@@ -508,10 +520,15 @@ export default function FloatingWorkTimer() {
 
                     {/* Descansos */}
                     <div className="p-3 rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border border-orange-200 dark:border-orange-800">
-                        <div className="text-xs text-orange-600 dark:text-orange-400 mb-1 font-medium">☕ Descansos</div>
+                        <div className="text-xs text-orange-600 dark:text-orange-400 mb-1 font-medium">☕ Descansos (se descuentan)</div>
                         <div className="text-lg font-bold text-orange-600 dark:text-orange-400">
                             {Math.floor(timeWorked.breakMinutes / 60)}h {timeWorked.breakMinutes % 60}m
                         </div>
+                        {timeWorked.effectiveBreakMinutes > 0 && (
+                            <div className="text-xs text-green-600 dark:text-green-400 mt-1">
+                                +{Math.floor(timeWorked.effectiveBreakMinutes / 60)}h {timeWorked.effectiveBreakMinutes % 60}m efectivo
+                            </div>
+                        )}
                     </div>
 
                     {/* Tiempo Efectivo */}
