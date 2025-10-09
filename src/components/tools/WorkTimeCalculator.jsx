@@ -97,6 +97,9 @@ export default function WorkTimeCalculator() {
     // Escuchar evento de reset completo desde el widget
     useEffect(() => {
         const handleReset = () => {
+            // Limpiar sessionStorage completamente
+            sessionStorage.clear();
+            
             // Resetear todos los campos a sus valores por defecto
             setStartTime("");
             setEndTime("");

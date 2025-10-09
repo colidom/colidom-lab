@@ -199,17 +199,29 @@ export default function FloatingWorkTimer() {
 
         const [startH, startM] = workSession.startTime.split(":").map(Number);
         const [nowH, nowM] = [currentTime.getHours(), currentTime.getMinutes()];
+        const [endH, endM] = workSession.endTime.split(":").map(Number);
 
         const startMinutes = startH * 60 + startM;
+        const endMinutes = endH * 60 + endM;
         let nowMinutes = nowH * 60 + nowM;
 
-        // Si la hora actual es menor que la hora de inicio, significa que cruzamos medianoche
-        // Ejemplo: inicio ayer 23:30, ahora son las 02:00 de hoy
-        if (nowMinutes < startMinutes) {
+        // Solo sumar 24h si realmente cruzamos medianoche:
+        // La jornada cruza medianoche SI la hora de fin es menor que la de inicio
+        const crossesMidnight = endMinutes < startMinutes;
+        
+        // Si cruzamos medianoche Y la hora actual es menor que la de inicio,
+        // significa que ya estamos en el día siguiente
+        if (crossesMidnight && nowMinutes < startMinutes) {
             nowMinutes += 1440; // Sumar 24 horas
         }
 
         let workedMinutes = nowMinutes - startMinutes;
+        
+        // Si el resultado es negativo, aún no ha llegado la hora de inicio
+        // Esto es normal si configuras una hora futura
+        if (workedMinutes < 0) {
+            return { hours: 0, minutes: 0 };
+        }
 
         const totalBreakMinutes = workSession.totalBreakMinutes || 0;
         const effectiveWorkedMinutes = Math.max(0, workedMinutes - totalBreakMinutes);
