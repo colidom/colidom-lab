@@ -6,10 +6,15 @@ export default function WorkTimeCalculator() {
     const [workDayType, setWorkDayType] = useState("normal");
     const [customHours, setCustomHours] = useState(8.5);
     const [startTime, setStartTime] = useState("");
-    const [breaks, setBreaks] = useState([{ duration: 30 }]);
+    const [breaks, setBreaks] = useState([]);
     const [endTime, setEndTime] = useState("");
     const [isLiveMode, setIsLiveMode] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
+    
+    // Estado para modal de descanso personalizado
+    const [showCustomBreakModal, setShowCustomBreakModal] = useState(false);
+    const [customBreakName, setCustomBreakName] = useState("");
+    const [customBreakDuration, setCustomBreakDuration] = useState(30);
     
     // Estado para el modal de confirmación
     const [confirmModal, setConfirmModal] = useState({
@@ -88,7 +93,7 @@ export default function WorkTimeCalculator() {
                 setEndTime(session.endTime);
                 setWorkDayType(session.workDayType);
                 setCustomHours(session.customHours || 8.5);
-                setBreaks(session.breaks || [{ duration: 30 }]);
+                setBreaks(session.breaks || []);
                 setIsLiveMode(true);
             }
         }
@@ -105,7 +110,7 @@ export default function WorkTimeCalculator() {
             setEndTime("");
             setWorkDayType("normal");
             setCustomHours(8.5);
-            setBreaks([{ duration: 30 }]);
+            setBreaks([]);
             setIsLiveMode(false);
         };
 
@@ -201,14 +206,21 @@ export default function WorkTimeCalculator() {
         setEndTime(`${endHours}:${endMinutes}`);
     }, [startTime, breaks, workDayType, customHours]);
 
-    const addBreak = () => {
-        setBreaks([...breaks, { duration: 30 }]);
+    const addBreak = (duration, name = "") => {
+        setBreaks([...breaks, { duration, name }]);
+    };
+
+    const addCustomBreak = () => {
+        if (customBreakDuration > 0) {
+            addBreak(customBreakDuration, customBreakName || "Descanso");
+            setShowCustomBreakModal(false);
+            setCustomBreakName("");
+            setCustomBreakDuration(30);
+        }
     };
 
     const removeBreak = (index) => {
-        if (breaks.length > 1) {
-            setBreaks(breaks.filter((_, i) => i !== index));
-        }
+        setBreaks(breaks.filter((_, i) => i !== index));
     };
 
     const updateBreak = (index, duration) => {
@@ -334,6 +346,11 @@ export default function WorkTimeCalculator() {
     };
 
     const totalBreakTime = breaks.reduce((sum, b) => sum + (b.duration || 0), 0);
+    const totalBreakHours = Math.floor(totalBreakTime / 60);
+    const totalBreakMinutes = totalBreakTime % 60;
+    const formattedBreakTime = totalBreakTime >= 60 
+        ? `${totalBreakHours}h ${totalBreakMinutes}min` 
+        : `${totalBreakTime} min`;
     const targetHours = workDayType === "normal" ? 8.5 : 
                        workDayType === "friday" ? 6 : 
                        workDayType === "summer" ? 7 : 
@@ -538,64 +555,191 @@ export default function WorkTimeCalculator() {
 
             {/* Sección: Descansos */}
             <div className="bg-gradient-to-br from-white/50 to-white/30 dark:from-gray-800/50 dark:to-gray-800/30 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
-                <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                        <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full"></div>
-                        <h2 className="text-xl font-bold text-blue-600 dark:text-blue-400 flex items-center gap-2">
-                            <MdLunchDining className="text-2xl" />
-                            Descansos
-                        </h2>
-                    </div>
-                    <button
-                        onClick={addBreak}
-                        className="px-4 py-2 rounded-lg font-medium transition-all duration-300 flex items-center gap-2
-                            bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 border-2 border-blue-500
-                            hover:bg-blue-50 dark:hover:bg-blue-950 hover:scale-105 shadow-md"
-                    >
-                        <MdAdd />
-                        Añadir
-                    </button>
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full"></div>
+                    <h2 className="text-xl font-bold text-blue-600 dark:text-blue-400 flex items-center gap-2">
+                        <MdLunchDining className="text-2xl" />
+                        Descansos
+                    </h2>
                 </div>
 
-                <div className="space-y-3">
-                    {breaks.map((breakItem, index) => (
-                        <div key={index} className="flex items-center gap-3">
-                            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 
-                                flex items-center justify-center text-white font-bold shadow-md">
-                                {index + 1}
-                            </div>
-                            <div className="flex-1">
-                                <input
-                                    type="number"
-                                    min="0"
-                                    max="180"
-                                    value={breakItem.duration}
-                                    onChange={(e) => updateBreak(index, e.target.value)}
-                                    className="w-full px-4 py-3 rounded-xl text-gray-900 dark:text-white
-                                        focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all
-                                        bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm border border-gray-200 dark:border-gray-700"
-                                    placeholder="Minutos"
-                                />
-                            </div>
-                            <span className="text-sm font-medium text-gray-600 dark:text-gray-400 min-w-[60px]">
-                                minutos
-                            </span>
-                            {breaks.length > 1 && (
-                                <button
-                                    onClick={() => removeBreak(index)}
-                                    className="p-3 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-                                >
-                                    <MdDelete className="text-red-500 text-xl" />
-                                </button>
-                            )}
-                        </div>
-                    ))}
+                {/* Botones de selección rápida */}
+                <div className="mb-6">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Añadir descanso:</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button
+                            onClick={() => addBreak(15, "Café")}
+                            className="group px-4 py-4 rounded-xl font-medium transition-all duration-300
+                                bg-white dark:bg-gray-900 border-2 border-blue-300 dark:border-blue-700
+                                hover:bg-blue-50 dark:hover:bg-blue-950 hover:scale-105 shadow-md
+                                flex flex-col items-center gap-2"
+                        >
+                            <span className="text-3xl">☕</span>
+                            <span className="text-blue-600 dark:text-blue-400 font-bold">15 min</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Café</span>
+                        </button>
+                        
+                        <button
+                            onClick={() => addBreak(30, "Almuerzo")}
+                            className="group px-4 py-4 rounded-xl font-medium transition-all duration-300
+                                bg-white dark:bg-gray-900 border-2 border-blue-300 dark:border-blue-700
+                                hover:bg-blue-50 dark:hover:bg-blue-950 hover:scale-105 shadow-md
+                                flex flex-col items-center gap-2"
+                        >
+                            <span className="text-3xl">🍔</span>
+                            <span className="text-blue-600 dark:text-blue-400 font-bold">30 min</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Almuerzo</span>
+                        </button>
+                        
+                        <button
+                            onClick={() => addBreak(60, "Comida")}
+                            className="group px-4 py-4 rounded-xl font-medium transition-all duration-300
+                                bg-white dark:bg-gray-900 border-2 border-blue-300 dark:border-blue-700
+                                hover:bg-blue-50 dark:hover:bg-blue-950 hover:scale-105 shadow-md
+                                flex flex-col items-center gap-2"
+                        >
+                            <span className="text-3xl">🍽️</span>
+                            <span className="text-blue-600 dark:text-blue-400 font-bold">1 hora</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Comida</span>
+                        </button>
+                        
+                        <button
+                            onClick={() => setShowCustomBreakModal(true)}
+                            className="group px-4 py-4 rounded-xl font-medium transition-all duration-300
+                                bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30
+                                border-2 border-purple-300 dark:border-purple-700
+                                hover:from-purple-200 hover:to-pink-200 dark:hover:from-purple-900/50 dark:hover:to-pink-900/50
+                                hover:scale-105 shadow-md
+                                flex flex-col items-center gap-2"
+                        >
+                            <span className="text-3xl">⚙️</span>
+                            <span className="text-purple-600 dark:text-purple-400 font-bold">Custom</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Personalizado</span>
+                        </button>
+                    </div>
                 </div>
+
+                {/* Modal de descanso personalizado */}
+                {showCustomBreakModal && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                         onClick={() => setShowCustomBreakModal(false)}>
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full shadow-2xl"
+                             onClick={(e) => e.stopPropagation()}>
+                            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">
+                                ⚙️ Descanso Personalizado
+                            </h3>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Nombre del descanso
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={customBreakName}
+                                        onChange={(e) => setCustomBreakName(e.target.value)}
+                                        placeholder="Ej: Reunión, Gimnasio, etc."
+                                        className="w-full px-4 py-3 rounded-xl text-gray-900 dark:text-white
+                                            focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all
+                                            bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Duración (minutos)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        max="180"
+                                        value={customBreakDuration}
+                                        onChange={(e) => setCustomBreakDuration(parseInt(e.target.value) || 0)}
+                                        className="w-full px-4 py-3 rounded-xl text-gray-900 dark:text-white
+                                            focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all
+                                            bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div className="flex gap-3 mt-6">
+                                <button
+                                    onClick={() => setShowCustomBreakModal(false)}
+                                    className="flex-1 px-4 py-3 rounded-xl font-medium transition-all duration-300
+                                        bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300
+                                        hover:bg-gray-200 dark:hover:bg-gray-600"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={addCustomBreak}
+                                    className="flex-1 px-4 py-3 rounded-xl font-medium transition-all duration-300
+                                        bg-gradient-to-r from-purple-500 to-pink-500 text-white
+                                        hover:from-purple-600 hover:to-pink-600 shadow-lg"
+                                >
+                                    Añadir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Lista de descansos añadidos */}
+                {breaks.length > 0 ? (
+                    <>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Descansos configurados:</p>
+                        <div className="space-y-3">
+                            {breaks.map((breakItem, index) => (
+                                <div key={index} className="flex items-center gap-3 bg-blue-50/50 dark:bg-blue-900/10 p-3 rounded-xl border border-blue-200 dark:border-blue-800">
+                                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 
+                                        flex items-center justify-center text-white font-bold shadow-md">
+                                        {index + 1}
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            {breakItem.name && (
+                                                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                                    {breakItem.name}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max="180"
+                                            value={breakItem.duration}
+                                            onChange={(e) => updateBreak(index, e.target.value)}
+                                            className="w-full px-4 py-2 rounded-lg text-gray-900 dark:text-white
+                                                focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all
+                                                bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm border border-gray-200 dark:border-gray-700"
+                                            placeholder="Minutos"
+                                        />
+                                    </div>
+                                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400 min-w-[60px]">
+                                        minutos
+                                    </span>
+                                    <button
+                                        onClick={() => removeBreak(index)}
+                                        className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                                    >
+                                        <MdDelete className="text-red-500 text-xl" />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                ) : (
+                    <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+                        <span className="text-4xl mb-2 block">⏰</span>
+                        <p className="text-sm">No hay descansos configurados</p>
+                        <p className="text-xs mt-1">Añade uno usando los botones de arriba</p>
+                    </div>
+                )}
 
                 <div className="mt-4 p-4 rounded-xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800/30">
                     <div className="flex justify-between items-center">
                         <span className="text-sm font-medium text-blue-700 dark:text-blue-400">Total de descansos:</span>
-                        <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{totalBreakTime} min</span>
+                        <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{formattedBreakTime}</span>
                     </div>
                 </div>
             </div>
