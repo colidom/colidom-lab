@@ -527,6 +527,9 @@ export default function WorkTimeCalculator() {
                 return workdayDate >= startOfWeek;
             });
             
+            // Ordenar por timestamp descendente (más reciente primero)
+            filtered.sort((a, b) => b.timestamp - a.timestamp);
+            
             setWeekWorkdays(filtered);
         }
     }, [activeView, historyKey]);
