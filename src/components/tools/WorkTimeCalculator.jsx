@@ -30,6 +30,7 @@ export default function WorkTimeCalculator() {
     const [editingWorkday, setEditingWorkday] = useState(null);
     const [showEditModal, setShowEditModal] = useState(false);
     const [editFormData, setEditFormData] = useState({
+        date: '',
         startTime: '',
         actualEndTime: '',
         workDayType: 'normal',
@@ -514,7 +515,11 @@ export default function WorkTimeCalculator() {
             const workdays = JSON.parse(localStorage.getItem('workdays') || '[]');
             const now = new Date();
             const startOfWeek = new Date(now);
-            startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Lunes
+            
+            // Calcular el lunes de esta semana correctamente
+            const dayOfWeek = now.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+            const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Si es domingo, retroceder 6 días
+            startOfWeek.setDate(now.getDate() + daysToMonday);
             startOfWeek.setHours(0, 0, 0, 0);
             
             const filtered = workdays.filter(w => {
@@ -555,6 +560,7 @@ export default function WorkTimeCalculator() {
     const openEditModal = (workday) => {
         setEditingWorkday(workday);
         setEditFormData({
+            date: workday.date, // YYYY-MM-DD
             startTime: workday.startTime,
             actualEndTime: workday.actualEndTime,
             workDayType: workday.workDayType,
@@ -602,9 +608,16 @@ export default function WorkTimeCalculator() {
         const expectedEndMins = expectedEndMinutes % 60;
         const endTime = `${String(expectedEndHours).padStart(2, '0')}:${String(expectedEndMins).padStart(2, '0')}`;
         
+        // Recalcular timestamp con la nueva fecha
+        const [year, month, day] = editFormData.date.split('-').map(Number);
+        const [actEndH, actEndM] = editFormData.actualEndTime.split(':').map(Number);
+        const newTimestamp = new Date(year, month - 1, day, actEndH, actEndM).getTime();
+        
         // Crear jornada actualizada
         const updatedWorkday = {
             ...editingWorkday,
+            date: editFormData.date,
+            timestamp: newTimestamp,
             startTime: editFormData.startTime,
             actualEndTime: editFormData.actualEndTime,
             endTime,
@@ -1541,16 +1554,23 @@ export default function WorkTimeCalculator() {
                         </div>
                         
                         <div className="space-y-6">
-                            {/* Fecha (solo lectura) */}
-                            <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700">
-                                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Fecha</div>
-                                <div className="text-lg font-bold text-gray-800 dark:text-gray-200">
-                                    {new Date(editingWorkday.timestamp).toLocaleDateString('es-ES', {
-                                        weekday: 'long',
-                                        day: '2-digit',
-                                        month: 'long',
-                                        year: 'numeric'
-                                    })}
+                            {/* Fecha (editable) */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    📅 Fecha de la Jornada
+                                </label>
+                                <input
+                                    type="date"
+                                    value={editFormData.date}
+                                    onChange={(e) => setEditFormData(prev => ({ ...prev, date: e.target.value }))}
+                                    className="w-full px-4 py-3 rounded-xl text-gray-900 dark:text-white font-medium
+                                        focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all
+                                        bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
+                                />
+                                <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                    Día de la semana: <span className="font-semibold capitalize">
+                                        {new Date(editFormData.date + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'long' })}
+                                    </span>
                                 </div>
                             </div>
                             
