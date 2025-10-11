@@ -210,14 +210,17 @@ export default function FloatingWorkTimer() {
         const [endH, endM] = workSession.endTime.split(":").map(Number);
 
         const startMinutes = startH * 60 + startM;
-        const endMinutes = endH * 60 + endM;
+        let endMinutes = endH * 60 + endM;
         let nowMinutes = nowH * 60 + nowM;
 
-        // Solo sumar 24h si realmente cruzamos medianoche
-        const crossesMidnight = endMinutes < startMinutes;
+        // Si la hora de fin es menor que la de inicio, cruza medianoche
+        if (endMinutes < startMinutes) {
+            endMinutes += 1440;
+        }
         
-        if (crossesMidnight && nowMinutes < startMinutes) {
-            nowMinutes += 1440; // Sumar 24 horas
+        // Si estamos antes de la hora de inicio, estamos en el día siguiente
+        if (nowMinutes < startMinutes && endMinutes > 1440) {
+            nowMinutes += 1440;
         }
 
         let workedMinutes = nowMinutes - startMinutes;
@@ -240,7 +243,6 @@ export default function FloatingWorkTimer() {
         const totalMinutes = workedMinutes % 60;
 
         // Calcular tiempo efectivo (descontando SOLO descansos no efectivos)
-        // Filtrar solo los descansos que NO son tiempo efectivo
         const breaks = workSession.breaks || [];
         const totalBreakMinutes = breaks.reduce((sum, b) => {
             return sum + (b.isEffectiveTime ? 0 : (b.duration || 0));
@@ -250,11 +252,14 @@ export default function FloatingWorkTimer() {
             return sum + (b.isEffectiveTime ? (b.duration || 0) : 0);
         }, 0);
         
+        // Calcular minutos efectivos trabajados
         const effectiveWorkedMinutes = workedMinutes - totalBreakMinutes;
         const isNegative = effectiveWorkedMinutes < 0;
         
-        const effectiveHours = Math.floor(Math.abs(effectiveWorkedMinutes) / 60);
-        const effectiveMinutes = Math.abs(effectiveWorkedMinutes) % 60;
+        // Usar el valor absoluto SOLO UNA VEZ para calcular horas y minutos
+        const absEffectiveMinutes = Math.abs(effectiveWorkedMinutes);
+        const effectiveHours = Math.floor(absEffectiveMinutes / 60);
+        const effectiveMinutes = absEffectiveMinutes % 60;
 
         return {
             totalHours,
@@ -528,7 +533,7 @@ export default function FloatingWorkTimer() {
                                         ? 'text-red-600 dark:text-red-400'
                                         : 'text-green-600 dark:text-green-400'
                                 }`}>
-                                    {timeWorked.isNegative && '-'}{timeWorked.effectiveHours}h {timeWorked.effectiveMinutes}m
+                                    {timeWorked.isNegative ? '-' : ''}{timeWorked.effectiveHours}h {timeWorked.effectiveMinutes}m
                                 </div>
                                 {timeWorked.breakMinutes > 0 && (
                                     <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { MdAccessTime, MdLunchDining, MdCheckCircle, MdPlayArrow, MdStop, MdAdd, MdDelete, MdCalendarToday, MdHistory, MdCalculate, MdFileDownload, MdFileUpload, MdSync, MdWarning } from "react-icons/md";
+import { MdAccessTime, MdLunchDining, MdCheckCircle, MdPlayArrow, MdStop, MdAdd, MdDelete, MdCalendarToday, MdHistory, MdCalculate, MdFileDownload, MdFileUpload, MdSync, MdWarning, MdEdit } from "react-icons/md";
 import ConfirmModal from "../ui/ConfirmModal";
 
 export default function WorkTimeCalculator() {
@@ -25,6 +25,20 @@ export default function WorkTimeCalculator() {
         const last = localStorage.getItem('lastBackupDate');
         return last ? new Date(last) : null;
     });
+    
+    // Estado para edición de jornadas
+    const [editingWorkday, setEditingWorkday] = useState(null);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editFormData, setEditFormData] = useState({
+        startTime: '',
+        actualEndTime: '',
+        workDayType: 'normal',
+        customHours: 8.5,
+        breaks: []
+    });
+    
+    // Estado para forzar re-render del historial
+    const [historyKey, setHistoryKey] = useState(0);
     
     // Estado para el modal de confirmación
     const [confirmModal, setConfirmModal] = useState({
@@ -492,21 +506,168 @@ export default function WorkTimeCalculator() {
         };
     };
 
-    // Obtener jornadas de la semana actual
-    const getWeekWorkdays = () => {
-        const workdays = JSON.parse(localStorage.getItem('workdays') || '[]');
-        const now = new Date();
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Lunes
-        startOfWeek.setHours(0, 0, 0, 0);
+    // Re-calcular jornadas de la semana cuando cambia activeView o historyKey
+    const [weekWorkdays, setWeekWorkdays] = useState([]);
+    
+    useEffect(() => {
+        if (activeView === 'history') {
+            const workdays = JSON.parse(localStorage.getItem('workdays') || '[]');
+            const now = new Date();
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Lunes
+            startOfWeek.setHours(0, 0, 0, 0);
+            
+            const filtered = workdays.filter(w => {
+                const workdayDate = new Date(w.timestamp);
+                return workdayDate >= startOfWeek;
+            });
+            
+            setWeekWorkdays(filtered);
+        }
+    }, [activeView, historyKey]);
+    
+    // Función para eliminar una jornada
+    const deleteWorkday = (timestamp) => {
+        showConfirm(
+            "¿Eliminar esta jornada?",
+            "Esta acción no se puede deshacer. La jornada será eliminada permanentemente.",
+            () => {
+                const workdays = JSON.parse(localStorage.getItem('workdays') || '[]');
+                const filtered = workdays.filter(w => w.timestamp !== timestamp);
+                localStorage.setItem('workdays', JSON.stringify(filtered));
+                setHistoryKey(prev => prev + 1); // Forzar re-render
+                
+                // Mostrar notificación de éxito
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-4 right-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl z-[9999] animate-slide-in';
+                notification.innerHTML = '<div class="font-bold text-lg">✅ Jornada eliminada</div>';
+                document.body.appendChild(notification);
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transition = 'opacity 0.3s';
+                    setTimeout(() => notification.remove(), 300);
+                }, 2000);
+            }
+        );
+    };
+    
+    // Función para abrir modal de edición
+    const openEditModal = (workday) => {
+        setEditingWorkday(workday);
+        setEditFormData({
+            startTime: workday.startTime,
+            actualEndTime: workday.actualEndTime,
+            workDayType: workday.workDayType,
+            customHours: workday.customHours || 8.5,
+            breaks: [...(workday.breaks || [])]
+        });
+        setShowEditModal(true);
+    };
+    
+    // Función para guardar cambios de edición
+    const saveEditedWorkday = () => {
+        if (!editingWorkday) return;
         
-        return workdays.filter(w => {
-            const workdayDate = new Date(w.timestamp);
-            return workdayDate >= startOfWeek;
+        // Recalcular todos los valores con los nuevos datos
+        const [startH, startM] = editFormData.startTime.split(":").map(Number);
+        const [endH, endM] = editFormData.actualEndTime.split(":").map(Number);
+        
+        const startMinutes = startH * 60 + startM;
+        let endMinutes = endH * 60 + endM;
+        
+        // Ajustar si cruza medianoche
+        if (endMinutes < startMinutes) {
+            endMinutes += 1440;
+        }
+        
+        const totalMinutes = endMinutes - startMinutes;
+        const breakMinutes = editFormData.breaks.reduce((sum, b) => {
+            return sum + (b.isEffectiveTime ? 0 : (b.duration || 0));
+        }, 0);
+        const effectiveMinutes = totalMinutes - breakMinutes;
+        
+        const targetHours = editFormData.workDayType === "normal" ? 8.5 : 
+                          editFormData.workDayType === "friday" ? 6 : 
+                          editFormData.workDayType === "summer" ? 7 : 
+                          editFormData.customHours;
+        const targetMinutes = targetHours * 60;
+        const overtimeMinutes = effectiveMinutes - targetMinutes;
+        
+        // Calcular hora de salida esperada
+        const totalBreakMinutes = editFormData.breaks.reduce((sum, b) => {
+            return sum + (b.isEffectiveTime ? 0 : (b.duration || 0));
+        }, 0);
+        const expectedEndMinutes = startMinutes + (targetHours * 60) + totalBreakMinutes;
+        const expectedEndHours = Math.floor(expectedEndMinutes / 60) % 24;
+        const expectedEndMins = expectedEndMinutes % 60;
+        const endTime = `${String(expectedEndHours).padStart(2, '0')}:${String(expectedEndMins).padStart(2, '0')}`;
+        
+        // Crear jornada actualizada
+        const updatedWorkday = {
+            ...editingWorkday,
+            startTime: editFormData.startTime,
+            actualEndTime: editFormData.actualEndTime,
+            endTime,
+            workDayType: editFormData.workDayType,
+            customHours: editFormData.customHours,
+            targetHours,
+            breaks: [...editFormData.breaks],
+            totalMinutes,
+            breakMinutes,
+            effectiveMinutes,
+            overtimeMinutes
+        };
+        
+        // Actualizar en localStorage
+        const workdays = JSON.parse(localStorage.getItem('workdays') || '[]');
+        const updated = workdays.map(w => 
+            w.timestamp === editingWorkday.timestamp ? updatedWorkday : w
+        );
+        localStorage.setItem('workdays', JSON.stringify(updated));
+        
+        // Cerrar modal y actualizar vista
+        setShowEditModal(false);
+        setEditingWorkday(null);
+        setHistoryKey(prev => prev + 1); // Forzar re-render
+        
+        // Mostrar notificación de éxito
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl z-[9999] animate-slide-in';
+        notification.innerHTML = '<div class="font-bold text-lg">✅ Jornada actualizada</div>';
+        document.body.appendChild(notification);
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transition = 'opacity 0.3s';
+            setTimeout(() => notification.remove(), 300);
+        }, 2000);
+    };
+    
+    // Funciones para manejar el formulario de edición
+    const addBreakToEdit = (duration, name = "", isEffectiveTime = false) => {
+        setEditFormData(prev => ({
+            ...prev,
+            breaks: [...prev.breaks, { duration, name, isEffectiveTime }]
+        }));
+    };
+    
+    const removeBreakFromEdit = (index) => {
+        setEditFormData(prev => ({
+            ...prev,
+            breaks: prev.breaks.filter((_, i) => i !== index)
+        }));
+    };
+    
+    const updateBreakInEdit = (index, field, value) => {
+        setEditFormData(prev => {
+            const newBreaks = [...prev.breaks];
+            if (field === 'duration') {
+                newBreaks[index].duration = parseInt(value) || 0;
+            } else if (field === 'isEffectiveTime') {
+                newBreaks[index].isEffectiveTime = value;
+            }
+            return { ...prev, breaks: newBreaks };
         });
     };
-
-    const weekWorkdays = activeView === 'history' ? getWeekWorkdays() : [];
     
     // Calcular estadísticas semanales
     const weekStats = weekWorkdays.reduce((acc, w) => {
@@ -1288,8 +1449,26 @@ export default function WorkTimeCalculator() {
                                                         </div>
                                                         <div className="text-sm text-gray-500 dark:text-gray-400">{dateStr}</div>
                                                     </div>
-                                                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                                                        {workday.startTime} - {workday.actualEndTime}
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                                                            {workday.startTime} - {workday.actualEndTime}
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                onClick={() => openEditModal(workday)}
+                                                                className="p-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors group"
+                                                                title="Editar jornada"
+                                                            >
+                                                                <MdEdit className="text-blue-600 dark:text-blue-400 text-lg group-hover:scale-110 transition-transform" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => deleteWorkday(workday.timestamp)}
+                                                                className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors group"
+                                                                title="Eliminar jornada"
+                                                            >
+                                                                <MdDelete className="text-red-500 dark:text-red-400 text-lg group-hover:scale-110 transition-transform" />
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-3 gap-3 text-sm">
@@ -1340,6 +1519,226 @@ export default function WorkTimeCalculator() {
                         )}
                     </div>
                 </>
+            )}
+            
+            {/* Modal de Edición de Jornada */}
+            {showEditModal && editingWorkday && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                     onClick={() => setShowEditModal(false)}>
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+                         onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                                <MdEdit className="text-blue-600 dark:text-blue-400" />
+                                Editar Jornada
+                            </h3>
+                            <button
+                                onClick={() => setShowEditModal(false)}
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                            >
+                                <span className="text-2xl text-gray-500 dark:text-gray-400">×</span>
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-6">
+                            {/* Fecha (solo lectura) */}
+                            <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700">
+                                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Fecha</div>
+                                <div className="text-lg font-bold text-gray-800 dark:text-gray-200">
+                                    {new Date(editingWorkday.timestamp).toLocaleDateString('es-ES', {
+                                        weekday: 'long',
+                                        day: '2-digit',
+                                        month: 'long',
+                                        year: 'numeric'
+                                    })}
+                                </div>
+                            </div>
+                            
+                            {/* Tipo de Jornada */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                                    Tipo de Jornada
+                                </label>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    {workDayTypes.map((type) => (
+                                        <button
+                                            key={type.id}
+                                            onClick={() => setEditFormData(prev => ({ ...prev, workDayType: type.id }))}
+                                            className={`px-4 py-3 rounded-xl font-medium transition-all duration-300 flex flex-col items-center gap-2 ${
+                                                editFormData.workDayType === type.id
+                                                    ? 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg'
+                                                    : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+                                            }`}
+                                        >
+                                            <span className="text-2xl">{type.icon}</span>
+                                            <span className="text-xs">{type.name}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                                {editFormData.workDayType === 'custom' && (
+                                    <div className="mt-4 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700">
+                                        <label className="block text-sm font-medium text-blue-700 dark:text-blue-400 mb-2">
+                                            Horas objetivo: {editFormData.customHours}h
+                                        </label>
+                                        <input
+                                            type="range"
+                                            min="1"
+                                            max="12"
+                                            step="0.5"
+                                            value={editFormData.customHours}
+                                            onChange={(e) => setEditFormData(prev => ({ ...prev, customHours: parseFloat(e.target.value) }))}
+                                            className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                            
+                            {/* Horarios */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Hora de Entrada
+                                    </label>
+                                    <input
+                                        type="time"
+                                        value={editFormData.startTime}
+                                        onChange={(e) => setEditFormData(prev => ({ ...prev, startTime: e.target.value }))}
+                                        className="w-full px-4 py-3 rounded-xl text-gray-900 dark:text-white font-mono
+                                            focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all
+                                            bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Hora de Salida Real
+                                    </label>
+                                    <input
+                                        type="time"
+                                        value={editFormData.actualEndTime}
+                                        onChange={(e) => setEditFormData(prev => ({ ...prev, actualEndTime: e.target.value }))}
+                                        className="w-full px-4 py-3 rounded-xl text-gray-900 dark:text-white font-mono
+                                            focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all
+                                            bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700"
+                                    />
+                                </div>
+                            </div>
+                            
+                            {/* Descansos */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                                    Descansos
+                                </label>
+                                
+                                {/* Botones rápidos */}
+                                <div className="grid grid-cols-4 gap-2 mb-4">
+                                    <button
+                                        onClick={() => addBreakToEdit(15, "Café")}
+                                        className="px-3 py-2 rounded-lg text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                                    >
+                                        ☕ 15min
+                                    </button>
+                                    <button
+                                        onClick={() => addBreakToEdit(30, "Almuerzo")}
+                                        className="px-3 py-2 rounded-lg text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                                    >
+                                        🍔 30min
+                                    </button>
+                                    <button
+                                        onClick={() => addBreakToEdit(60, "Comida")}
+                                        className="px-3 py-2 rounded-lg text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                                    >
+                                        🍽️ 1h
+                                    </button>
+                                    <button
+                                        onClick={() => addBreakToEdit(30, "Descanso")}
+                                        className="px-3 py-2 rounded-lg text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
+                                    >
+                                        + Añadir
+                                    </button>
+                                </div>
+                                
+                                {/* Lista de descansos */}
+                                {editFormData.breaks.length > 0 ? (
+                                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                                        {editFormData.breaks.map((breakItem, index) => (
+                                            <div key={index} className={`flex items-center gap-2 p-3 rounded-lg border ${
+                                                breakItem.isEffectiveTime
+                                                    ? 'bg-green-50/50 dark:bg-green-900/10 border-green-300 dark:border-green-700'
+                                                    : 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800'
+                                            }`}>
+                                                <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold ${
+                                                    breakItem.isEffectiveTime
+                                                        ? 'bg-gradient-to-br from-green-500 to-emerald-500'
+                                                        : 'bg-gradient-to-br from-blue-500 to-cyan-500'
+                                                }`}>
+                                                    {breakItem.isEffectiveTime ? '✓' : index + 1}
+                                                </div>
+                                                <div className="flex-1">
+                                                    {breakItem.name && (
+                                                        <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                                            {breakItem.name}
+                                                        </div>
+                                                    )}
+                                                    <div className="flex items-center gap-2">
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            max="180"
+                                                            value={breakItem.duration}
+                                                            onChange={(e) => updateBreakInEdit(index, 'duration', e.target.value)}
+                                                            className="w-20 px-2 py-1 rounded text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+                                                        />
+                                                        <span className="text-xs text-gray-600 dark:text-gray-400">min</span>
+                                                        <label className="flex items-center gap-1 cursor-pointer text-xs">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={breakItem.isEffectiveTime || false}
+                                                                onChange={(e) => updateBreakInEdit(index, 'isEffectiveTime', e.target.checked)}
+                                                                className="w-3 h-3 text-green-600 rounded"
+                                                            />
+                                                            <span className="text-gray-600 dark:text-gray-400">Efectivo</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => removeBreakFromEdit(index)}
+                                                    className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                                                >
+                                                    <MdDelete className="text-red-500 text-lg" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
+                                        No hay descansos configurados
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        
+                        {/* Botones de acción */}
+                        <div className="flex gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <button
+                                onClick={() => setShowEditModal(false)}
+                                className="flex-1 px-4 py-3 rounded-xl font-medium transition-all duration-300
+                                    bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300
+                                    hover:bg-gray-200 dark:hover:bg-gray-600"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={saveEditedWorkday}
+                                className="flex-1 px-4 py-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2
+                                    bg-gradient-to-r from-blue-500 to-cyan-500 text-white
+                                    hover:from-blue-600 hover:to-cyan-600 shadow-lg hover:shadow-xl"
+                            >
+                                <MdCheckCircle className="text-xl" />
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
