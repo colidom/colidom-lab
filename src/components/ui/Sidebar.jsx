@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { MdChevronLeft, MdChevronRight } from "react-icons/md";
+import { MdChevronLeft, MdChevronRight, MdMenu } from "react-icons/md";
 
 export default function Sidebar({ navItems, activeToolId, basePath, isOpen, onClose, onToggle }) {
     return (
@@ -11,6 +11,25 @@ export default function Sidebar({ navItems, activeToolId, basePath, isOpen, onCl
                     className="fixed inset-0 bg-black/50 z-30 md:hidden"
                     onClick={onClose}
                 />
+            )}
+
+            {/* Botón flotante para móviles cuando el sidebar está cerrado */}
+            {!isOpen && (
+                <button
+                    onClick={onToggle}
+                    className="md:hidden fixed top-1/2 -translate-y-1/2 left-0
+                        w-8 h-16 
+                        bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl
+                        border-r border-t border-b border-gray-200 dark:border-gray-700
+                        rounded-r-xl shadow-lg
+                        flex items-center justify-center
+                        hover:w-10
+                        transition-all duration-300 ease-in-out
+                        group z-50"
+                    aria-label="Mostrar menú"
+                >
+                    <MdChevronRight className="text-2xl text-gray-600 dark:text-gray-300 group-hover:scale-110 transition-transform duration-300" />
+                </button>
             )}
 
             <aside 
@@ -58,20 +77,6 @@ export default function Sidebar({ navItems, activeToolId, basePath, isOpen, onCl
                         />
                     </div>
                 </button>
-
-                {/* Botón flotante para móviles cuando el sidebar está cerrado */}
-                {!isOpen && (
-                    <button
-                        onClick={onToggle}
-                        className="md:hidden fixed top-24 left-4 z-50 p-3 rounded-xl 
-                            bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl 
-                            shadow-lg border border-gray-200 dark:border-gray-700
-                            hover:scale-110 transition-all duration-200"
-                        aria-label="Mostrar menú"
-                    >
-                        <MdChevronRight className="text-2xl text-gray-700 dark:text-gray-300" />
-                    </button>
-                )}
 
                 <div className="h-full flex flex-col pt-28 pb-6 px-6">
                     {/* Header del sidebar */}

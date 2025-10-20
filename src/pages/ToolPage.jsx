@@ -6,7 +6,8 @@ import { allTools } from "../data/allTools";
 export default function ToolPage() {
     const { toolId, categoryId } = useParams();
     const navigate = useNavigate();
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    // Iniciar el sidebar cerrado en móviles
+    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
 
     const toolsInCategory = allTools.filter((tool) => tool.category === categoryId);
     const activeTool = toolsInCategory.find((tool) => tool.id === toolId);
